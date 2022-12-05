@@ -43,7 +43,7 @@ jobs:
 
         pytest -vv -r ap --cov tvb_ext_bucket
         jupyter server extension list
-        jupyter server extension list 2>&1 | grep -ie "tvb-ext-bucket.*OK"
+        jupyter server extension list 2>&1 | grep -ie "tvb_ext_bucket.*OK"
 
         jupyter labextension list
         jupyter labextension list 2>&1 | grep -ie "tvb-ext-bucket.*OK"
@@ -90,7 +90,7 @@ jobs:
 
 
         jupyter server extension list
-        jupyter server extension list 2>&1 | grep -ie "tvb-ext-bucket.*OK"
+        jupyter server extension list 2>&1 | grep -ie "tvb_ext_bucket.*OK"
 
         jupyter labextension list
         jupyter labextension list 2>&1 | grep -ie "tvb-ext-bucket.*OK"
