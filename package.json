@@ -55,9 +55,10 @@
   },
   "dependencies": {
     "@jupyterlab/application": "^3.1.0",
+    "@jupyterlab/apputils": "^3.5.0",
+    "@jupyterlab/console": "^3.5.0",
     "@jupyterlab/coreutils": "^5.1.0",
     "@jupyterlab/services": "^6.1.0"
-
   },
   "devDependencies": {
     "@babel/core": "^7.0.0",
@@ -80,8 +81,8 @@
     "stylelint-config-recommended": "^6.0.0",
     "stylelint-config-standard": "~24.0.0",
     "stylelint-prettier": "^2.0.0",
-    "typescript": "~4.1.3",
-    "ts-jest": "^26.0.0"
+    "ts-jest": "^26.0.0",
+    "typescript": "~4.1.3"
   },
   "sideEffects": [
     "style/*.css",
@@ -91,19 +92,19 @@
   "publishConfig": {
     "access": "public"
   },
-  "jupyterlab": { 
+  "jupyterlab": {
     "discovery": {
-        "server": {
-          "managers": [
-            "pip"
-          ],
-          "base": {
-            "name": "tvb-ext-bucket"
-          }
+      "server": {
+        "managers": [
+          "pip"
+        ],
+        "base": {
+          "name": "tvb-ext-bucket"
         }
+      }
     },
     "extension": true,
-    "outputDir": "tvb-ext-bucket/labextension"
+    "outputDir": "tvb_ext_bucket/labextension"
   },
   "jupyter-releaser": {
     "hooks": {

@@ -41,7 +41,7 @@ jobs:
         set -eux
         python -m pip install .
 
-        pytest -vv -r ap --cov tvb-ext-bucket
+        pytest -vv -r ap --cov tvb_ext_bucket
         jupyter server extension list
         jupyter server extension list 2>&1 | grep -ie "tvb-ext-bucket.*OK"
 

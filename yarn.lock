@@ -1475,6 +1475,29 @@
     react "^17.0.1"
     y-codemirror "^3.0.1"
 
+"@jupyterlab/console@^3.5.0":
+  version "3.5.0"
+  resolved "https://registry.yarnpkg.com/@jupyterlab/console/-/console-3.5.0.tgz#299d18fb0c46446dbfbe866ab5b8c92294d2fbb6"
+  integrity sha512-mzKTQUvn/cRAfGC4Vaylb6OQINuqKxTz082GLgYUNm+V6HqJ2CX76gNxwkS9Xcpo+908ab9/jATcfYcS60p3+w==
+  dependencies:
+    "@jupyterlab/apputils" "^3.5.0"
+    "@jupyterlab/cells" "^3.5.0"
+    "@jupyterlab/codeeditor" "^3.5.0"
+    "@jupyterlab/coreutils" "^5.5.0"
+    "@jupyterlab/nbformat" "^3.5.0"
+    "@jupyterlab/observables" "^4.5.0"
+    "@jupyterlab/rendermime" "^3.5.0"
+    "@jupyterlab/services" "^6.5.0"
+    "@jupyterlab/translation" "^3.5.0"
+    "@jupyterlab/ui-components" "^3.5.0"
+    "@lumino/algorithm" "^1.9.0"
+    "@lumino/coreutils" "^1.11.0"
+    "@lumino/disposable" "^1.10.0"
+    "@lumino/dragdrop" "^1.13.0"
+    "@lumino/messaging" "^1.10.0"
+    "@lumino/signaling" "^1.10.0"
+    "@lumino/widgets" "^1.33.0"
+
 "@jupyterlab/coreutils@^5.1.0", "@jupyterlab/coreutils@^5.5.0":
   version "5.5.0"
   resolved "https://registry.yarnpkg.com/@jupyterlab/coreutils/-/coreutils-5.5.0.tgz#0cbceb74e75a96cc69c8dd14b61f37d8ea940d75"

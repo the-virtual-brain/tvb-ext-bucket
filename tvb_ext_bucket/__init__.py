@@ -6,14 +6,14 @@ from .handlers import setup_handlers
 def _jupyter_labextension_paths():
     return [{
         "src": "labextension",
-        "dest": "tvb-ext-bucket"
+        "dest": "tvb_ext_bucket"
     }]
 
 
 
 def _jupyter_server_extension_points():
     return [{
-        "module": "tvb-ext-bucket"
+        "module": "tvb_ext_bucket"
     }]
 
 
@@ -26,7 +26,7 @@ def _load_jupyter_server_extension(server_app):
         JupyterLab application instance
     """
     setup_handlers(server_app.web_app)
-    name = "tvb-ext-bucket"
+    name = "tvb_ext_bucket"
     server_app.log.info(f"Registered {name} server extension")
 
 

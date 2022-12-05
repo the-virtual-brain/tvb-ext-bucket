@@ -3,7 +3,7 @@
 [![Github Actions Status](https://github.com/the-virtual-brain/tvb-ext-bucket/workflows/Build/badge.svg)](https://github.com/the-virtual-brain/tvb-ext-bucket/actions/workflows/build.yml)
 Extension for collabs bucket interaction
 
-This extension is composed of a Python package named `tvb-ext-bucket`
+This extension is composed of a Python package named `tvb_ext_bucket`
 for the server extension and a NPM package named `tvb-ext-bucket`
 for the frontend extension.
 
@@ -61,7 +61,7 @@ pip install -e .
 # Link your development version of the extension with JupyterLab
 jupyter labextension develop . --overwrite
 # Server extension must be manually installed in develop mode
-jupyter server extension enable tvb-ext-bucket
+jupyter server extension enable tvb_ext_bucket
 # Rebuild extension Typescript source after making changes
 jlpm build
 ```
@@ -87,7 +87,7 @@ jupyter lab build --minimize=False
 
 ```bash
 # Server extension must be manually disabled in develop mode
-jupyter server extension disable tvb-ext-bucket
+jupyter server extension disable tvb_ext_bucket
 pip uninstall tvb-ext-bucket
 ```
 
@@ -110,7 +110,7 @@ pip install -e ".[test]"
 To execute them, run:
 
 ```sh
-pytest -vv -r ap --cov tvb-ext-bucket
+pytest -vv -r ap --cov tvb_ext_bucket
 ```
 
 #### Frontend tests
@@ -123,13 +123,6 @@ To execute them, execute:
 jlpm
 jlpm test
 ```
-
-#### Integration tests
-
-This extension uses [Playwright](https://playwright.dev/docs/intro/) for the integration tests (aka user level tests).
-More precisely, the JupyterLab helper [Galata](https://github.com/jupyterlab/jupyterlab/tree/master/galata) is used to handle testing the extension in JupyterLab.
-
-More information are provided within the [ui-tests](./ui-tests/README.md) README.
 
 ### Packaging the extension
 
