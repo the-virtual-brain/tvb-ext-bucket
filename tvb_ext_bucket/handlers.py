@@ -25,7 +25,6 @@ class BucketsHandler(APIHandler):
             bucket_wraper = BucketWrapper()
             response['files'] = bucket_wraper.get_files_in_bucket(bucket_name)
         except MissingArgumentError:
-            self.set_status(400)
             response['message'] = 'No collab name provided!'
         except TokenExpired as e:
             LOGGER.info(f'Collab token expired: {e}')
