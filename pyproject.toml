@@ -77,3 +77,10 @@ build_dir = "tvbextbucket/labextension"
 
 [tool.jupyter-releaser.options]
 version_cmd = "hatch version"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["LICENSE", "*.md", "pyproject.toml", "package.json", "install.json", "babel.config.js", "jest.config.js",
+           "AUTHORS", "ts*.json", "*.properties", "yarn.lock", "tvbextbucket/logger/logging.conf"]
+namespaces = false
+exclude = ["**/node_modules", "lib", "binder", "*.log", "*.pyc", "*.pyo", ".git", ".ipynb_checkpoints"]
