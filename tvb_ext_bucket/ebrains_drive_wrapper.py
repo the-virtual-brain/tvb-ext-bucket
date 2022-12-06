@@ -40,24 +40,7 @@ def get_collab_token():
 
 class BucketWrapper:
     def __init__(self):
-        try:
-            token = get_collab_token()
-        except Exception as e:
-            LOGGER.error(f'Failed to get token: {e}')
-            LOGGER.info(f'Retrying to get token from environment variable {TOKEN_ENV_VAR}...')
-            token = os.environ.get(TOKEN_ENV_VAR)
-            LOGGER.info('Token retrieved successfully!')
-        if not token:
-            raise CollabTokenError('Failed to connect to EBRAINS! Could not find token!')
-        self.client = BucketApiClient(token=token)
-
-    def get_buckets(self):
-        try:
-            links = self.client.get(f"/v1/buckets")
-            return links.json()
-        except Exception as e:
-            LOGGER.error(f'Could not get links at endpoint! {e}')
-            return [e.__dict__]
+        self.client = self.get_client()
 
     def get_files_in_bucket(self, bucket_name):
         # type: (str) -> list[str]
@@ -74,3 +57,15 @@ class BucketWrapper:
             LOGGER.error(f'Could not access bucket {bucket_name} due to {e}')
             raise CollabAccessError(e)
         return [f.name for f in bucket.ls()]
+
+    def get_client(self):
+        try:
+            token = get_collab_token()
+        except Exception as e:
+            LOGGER.error(f'Failed to get token: {e}')
+            LOGGER.info(f'Retrying to get token from environment variable {TOKEN_ENV_VAR}...')
+            token = os.environ.get(TOKEN_ENV_VAR)
+            LOGGER.info('Token retrieved successfully!')
+        if not token:
+            raise CollabTokenError('Failed to connect to EBRAINS! Could not find token!')
+        return BucketApiClient(token=token)
