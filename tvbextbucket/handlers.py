@@ -1,14 +1,19 @@
-import json
+# -*- coding: utf-8 -*-
+#
+# "TheVirtualBrain - Widgets" package
+#
+# (c) 2022-2023, TVB Widgets Team
+#
 
+import json
+import tornado
 from jupyter_server.base.handlers import APIHandler
 from jupyter_server.utils import url_path_join
-import tornado
 from tornado.web import MissingArgumentError
-
 from ebrains_drive.exceptions import TokenExpired
-from tvb_ext_bucket.exceptions import CollabAccessError
-from tvb_ext_bucket.ebrains_drive_wrapper import BucketWrapper
-from tvb_ext_bucket.logger.builder import get_logger
+from tvbextbucket.exceptions import CollabAccessError
+from tvbextbucket.ebrains_drive_wrapper import BucketWrapper
+from tvbextbucket.logger.builder import get_logger
 
 LOGGER = get_logger(__name__)
 
@@ -38,6 +43,6 @@ def setup_handlers(web_app):
     host_pattern = ".*$"
 
     base_url = web_app.settings["base_url"]
-    bucket_pattern = url_path_join(base_url, "tvb_ext_bucket", "buckets")
+    bucket_pattern = url_path_join(base_url, "tvbextbucket", "buckets")
     handlers = [(bucket_pattern, BucketsHandler)]
     web_app.add_handlers(host_pattern, handlers)

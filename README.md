@@ -3,7 +3,7 @@
 [![Github Actions Status](https://github.com/the-virtual-brain/tvb-ext-bucket/workflows/Build/badge.svg)](https://github.com/the-virtual-brain/tvb-ext-bucket/actions/workflows/build.yml)
 Extension for collabs bucket interaction
 
-This extension is composed of a Python package named `tvb_ext_bucket`
+This extension is composed of a Python package named `tvbextbucket`
 for the server extension and a NPM package named `tvb-ext-bucket`
 for the frontend extension.
 
@@ -61,7 +61,7 @@ pip install -e .
 # Link your development version of the extension with JupyterLab
 jupyter labextension develop . --overwrite
 # Server extension must be manually installed in develop mode
-jupyter server extension enable tvb_ext_bucket
+jupyter server extension enable tvbextbucket
 # Rebuild extension Typescript source after making changes
 jlpm build
 ```
@@ -87,7 +87,7 @@ jupyter lab build --minimize=False
 
 ```bash
 # Server extension must be manually disabled in develop mode
-jupyter server extension disable tvb_ext_bucket
+jupyter server extension disable tvbextbucket
 pip uninstall tvb-ext-bucket
 ```
 
@@ -110,7 +110,7 @@ pip install -e ".[test]"
 To execute them, run:
 
 ```sh
-pytest -vv -r ap --cov tvb_ext_bucket
+pytest -vv -r ap --cov tvbextbucket
 ```
 
 #### Frontend tests

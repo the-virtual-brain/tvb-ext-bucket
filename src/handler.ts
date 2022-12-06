@@ -17,7 +17,7 @@ export async function requestAPI<T>(
   const settings = ServerConnection.makeSettings();
   const requestUrl = URLExt.join(
     settings.baseUrl,
-    'tvb_ext_bucket', // API Namespace
+    'tvbextbucket', // API Namespace
     endPoint
   );
 

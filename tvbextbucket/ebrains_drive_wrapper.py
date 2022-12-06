@@ -9,8 +9,8 @@ from ebrains_drive import BucketApiClient
 
 from ebrains_drive.exceptions import Unauthorized
 
-from tvb_ext_bucket.logger.builder import get_logger
-from tvb_ext_bucket.exceptions import CollabTokenError, CollabAccessError
+from tvbextbucket.logger.builder import get_logger
+from tvbextbucket.exceptions import CollabTokenError, CollabAccessError
 import os
 
 

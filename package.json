@@ -36,7 +36,7 @@
     "clean": "jlpm clean:lib",
     "clean:lib": "rimraf lib tsconfig.tsbuildinfo",
     "clean:lintcache": "rimraf .eslintcache .stylelintcache",
-    "clean:labextension": "rimraf tvb-ext-bucket/labextension",
+    "clean:labextension": "rimraf tvbextbucket/labextension",
     "clean:all": "jlpm clean:lib && jlpm clean:labextension && jlpm clean:lintcache",
     "eslint": "jlpm eslint:check --fix",
     "eslint:check": "eslint . --cache --ext .ts,.tsx",
@@ -104,7 +104,7 @@
       }
     },
     "extension": true,
-    "outputDir": "tvb_ext_bucket/labextension"
+    "outputDir": "tvbextbucket/labextension"
   },
   "jupyter-releaser": {
     "hooks": {

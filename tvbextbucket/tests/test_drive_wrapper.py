@@ -1,4 +1,11 @@
-from tvb_ext_bucket.ebrains_drive_wrapper import BucketWrapper
+# -*- coding: utf-8 -*-
+#
+# "TheVirtualBrain - Widgets" package
+#
+# (c) 2022-2023, TVB Widgets Team
+#
+
+from tvbextbucket.ebrains_drive_wrapper import BucketWrapper
 
 
 class MockFile:
@@ -35,9 +42,10 @@ def test_get_files_in_bucket(mocker):
     """
     tests that client returns list of files from bucket
     """
+
     def mock_get_client(_):
         return MockBucketApiClient()
 
-    mocker.patch('tvb_ext_bucket.ebrains_drive_wrapper.BucketWrapper.get_client', mock_get_client)
+    mocker.patch('tvbextbucket.ebrains_drive_wrapper.BucketWrapper.get_client', mock_get_client)
     client = BucketWrapper()
     assert client.get_files_in_bucket('test_bucket') == ['file0', 'file1']

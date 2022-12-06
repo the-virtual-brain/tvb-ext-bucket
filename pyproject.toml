@@ -3,10 +3,10 @@ requires = ["hatchling>=1.4.0", "jupyterlab>=3.4.7,<4.0.0", "hatch-nodejs-versio
 build-backend = "hatchling.build"
 
 [project]
-name = "tvb_ext_bucket"
+name = "tvb-ext-bucket"
 readme = "README.md"
 license = { file = "LICENSE" }
-requires-python = ">=3.7"
+requires-python = ">=3.8"
 classifiers = [
     "Framework :: Jupyter",
     "Framework :: Jupyter :: JupyterLab",
@@ -16,7 +16,6 @@ classifiers = [
     "License :: OSI Approved :: GNU General Public License (GPL)",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
@@ -43,26 +42,26 @@ source = "nodejs"
 fields = ["description", "authors", "urls"]
 
 [tool.hatch.build.targets.sdist]
-artifacts = ["tvb_ext_bucket/labextension"]
+artifacts = ["tvbextbucket/labextension"]
 exclude = [".github", "binder"]
 
 [tool.hatch.build.targets.wheel.shared-data]
-"tvb_ext_bucket/labextension" = "share/jupyter/labextensions/tvb-ext-bucket"
+"tvbextbucket/labextension" = "share/jupyter/labextensions/tvb-ext-bucket"
 "install.json" = "share/jupyter/labextensions/tvb-ext-bucket/install.json"
 "jupyter-config/server-config" = "etc/jupyter/jupyter_server_config.d"
 "jupyter-config/nb-config" = "etc/jupyter/jupyter_notebook_config.d"
 
 [tool.hatch.build.hooks.version]
-path = "tvb_ext_bucket/_version.py"
+path = "tvbextbucket/_version.py"
 
 [tool.hatch.build.hooks.jupyter-builder]
 dependencies = ["hatch-jupyter-builder>=0.5"]
 build-function = "hatch_jupyter_builder.npm_builder"
 ensured-targets = [
-    "tvb_ext_bucket/labextension/static/style.js",
-    "tvb_ext_bucket/labextension/package.json",
+    "tvbextbucket/labextension/static/style.js",
+    "tvbextbucket/labextension/package.json",
 ]
-skip-if-exists = ["tvb_ext_bucket/labextension/static/style.js"]
+skip-if-exists = ["tvbextbucket/labextension/static/style.js"]
 
 [tool.hatch.build.hooks.jupyter-builder.build-kwargs]
 build_cmd = "build:prod"
@@ -72,7 +71,7 @@ npm = ["jlpm"]
 build_cmd = "install:extension"
 npm = ["jlpm"]
 source_dir = "src"
-build_dir = "tvb_ext_bucket/labextension"
+build_dir = "tvbextbucket/labextension"
 
 [tool.jupyter-releaser.options]
 version_cmd = "hatch version"

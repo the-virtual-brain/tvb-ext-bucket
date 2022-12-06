@@ -21,7 +21,7 @@ import { BucketWidget } from './BucketWidget';
  * Initialization data for the tvb-ext-bucket extension.
  */
 const plugin: JupyterFrontEndPlugin<void> = {
-  id: 'tvb-ext-bucket:plugin',
+  id: 'tvbextbucket:plugin',
   autoStart: true,
   requires: [
     ICommandPalette,

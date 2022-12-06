@@ -41,9 +41,9 @@ jobs:
         set -eux
         python -m pip install .
 
-        pytest -vv -r ap --cov tvb_ext_bucket
+        pytest -vv -r ap --cov tvbextbucket
         jupyter server extension list
-        jupyter server extension list 2>&1 | grep -ie "tvb_ext_bucket.*OK"
+        jupyter server extension list 2>&1 | grep -ie "tvbextbucket.*OK"
 
         jupyter labextension list
         jupyter labextension list 2>&1 | grep -ie "tvb-ext-bucket.*OK"
@@ -61,7 +61,7 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: extension-artifacts
-        path: dist/tvb_ext_bucket*
+        path: dist/tvbextbucket*
         if-no-files-found: error
 
   test_isolated:
@@ -86,11 +86,10 @@ jobs:
         sudo rm -rf $(which node)
         sudo rm -rf $(which node)
         
-        pip install "jupyterlab~=3.1" tvb_ext_bucket*.tar.gz
-
+        pip install "jupyterlab~=3.1" tvbextbucket*.tar.gz
 
         jupyter server extension list
-        jupyter server extension list 2>&1 | grep -ie "tvb_ext_bucket.*OK"
+        jupyter server extension list 2>&1 | grep -ie "tvbextbucket.*OK"
 
         jupyter labextension list
         jupyter labextension list 2>&1 | grep -ie "tvb-ext-bucket.*OK"
