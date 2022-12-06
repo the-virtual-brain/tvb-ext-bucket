@@ -25,7 +25,7 @@ jobs:
 
     - name: Install dependencies
       run: |
-      python -m pip install -U jupyterlab~=3.1 ebrains-drive pytest pytest-mock pytest_tornasync pytest-cov
+        python -m pip install -U jupyterlab~=3.1 ebrains-drive pytest pytest-mock pytest_tornasync pytest-cov
 
     - name: Build and package the extension
       env:
