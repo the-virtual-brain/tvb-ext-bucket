@@ -24,7 +24,7 @@ jobs:
       uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
 
     - name: Install dependencies
-      run: python -m pip install -U jupyterlab~=3.1 ebrains-drive pytest pytest-mock pytest_tornasync pytest-cov
+      run: python -m pip install -U jupyterlab~=3.1 ebrains-drive pytest pytest-mock pytest-jupyter pytest_tornasync pytest-cov
 
     - name: Lint the extension
       run: |
