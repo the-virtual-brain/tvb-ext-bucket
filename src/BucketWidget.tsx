@@ -31,6 +31,7 @@ export const BucketSpace = (): JSX.Element => {
   return (
     <>
       <div>
+        <div className={'collab-logo'} />
         <input
           type={'text'}
           value={bucketName}

@@ -5,11 +5,7 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
-import {
-  ICommandPalette,
-  MainAreaWidget,
-  WidgetTracker
-} from '@jupyterlab/apputils';
+import { ICommandPalette, WidgetTracker } from '@jupyterlab/apputils';
 
 import { INotebookTracker } from '@jupyterlab/notebook';
 
@@ -35,42 +31,24 @@ const plugin: JupyterFrontEndPlugin<void> = {
     palette: ICommandPalette,
     restorer: ILayoutRestorer,
     consoleTracker: IConsoleTracker,
-    labShell: ILabShell,
-    notebookTracker: INotebookTracker
+    labShell: ILabShell
   ) => {
     console.log('JupyterLab extension tvb-ext-bucket is activated!');
 
-    let widget: MainAreaWidget<BucketWidget>;
+    const id = 'tvb-ext-bucket';
+    const sidebar = new BucketWidget();
+    sidebar.id = id;
+    sidebar.title.iconClass = 'bucket-CollabLogo jp-SideBar-tabIcon';
+    sidebar.title.caption = 'Bucket';
     const command = 'tvbextbucket:open';
-    app.commands.addCommand(command, {
-      label: 'Bucket File Browser',
-      execute: (): any => {
-        if (!widget || widget.isDisposed) {
-          const content = new BucketWidget();
-          widget = new MainAreaWidget<BucketWidget>({ content });
-          widget.id = 'tvbextbucket';
-          widget.title.label = 'Bucket File Browser';
-          widget.title.closable = true;
-        }
 
-        if (!tracker.has(widget)) {
-          //Track the state of the widget for later restore
-          tracker.add(widget);
-        }
+    labShell.add(sidebar, 'right', { rank: 200 });
 
-        if (!widget.isAttached) {
-          app.shell.add(widget, 'main');
-        }
-        app.shell.activateById(widget.id);
-      }
-    });
-
-    palette.addItem({ command, category: 'Bucket' });
-
-    const tracker = new WidgetTracker<MainAreaWidget<BucketWidget>>({
+    const tracker = new WidgetTracker<BucketWidget>({
       namespace: 'bucket'
     });
 
+    restorer.add(sidebar, id);
     restorer.restore(tracker, {
       command,
       name: () => 'bucket'

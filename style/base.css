@@ -3,3 +3,13 @@
 
     https://jupyterlab.readthedocs.io/en/stable/developer/css.html
 */
+
+.collab-logo {
+  background-image: url(Collaboratory_EBRAINS.svg);
+  background-repeat: no-repeat;
+  height: 40px;
+}
+
+.bucket-CollabLogo {
+  background-image: url(ebrains_logo.png);
+}
