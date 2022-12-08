@@ -1,28 +1,22 @@
-import React, { ReactElement, useState } from 'react';
+import React, { ReactElement, useState, useCallback } from 'react';
 import { ReactWidget } from '@jupyterlab/apputils';
-import { requestAPI } from './handler';
-
-export namespace types {
-  export interface IBucketResponse {
-    message: string;
-    files: Array<string>;
-  }
-}
+import { jupyterIcon } from '@jupyterlab/ui-components';
+import { BucketFileBrowser } from './bucketFileBrowser';
 
 export const BucketSpace = (): JSX.Element => {
-  const [files, setFiles] = useState<Array<string>>([]);
+  const [files, setFiles] = useState<Set<BucketFileBrowser.IBucketEntry>>(
+    new Set<BucketFileBrowser.IBucketEntry>()
+  );
   const [bucketName, setBucketName] = useState<string>('');
 
-  const getBucket = () => {
-    requestAPI<types.IBucketResponse>(`buckets?bucket=${bucketName}`)
-      .then(response => {
-        setFiles(response.files);
-        console.log(response.message);
-      })
-      .catch(err => {
-        console.log('Got Error! : ', err);
-      });
-  };
+  const bucketBrowser = new BucketFileBrowser({
+    bucketEndPoint: 'buckets',
+    bucket: bucketName
+  });
+
+  const getBucket = useCallback(() => {
+    bucketBrowser.openBucket().then(files => setFiles(files));
+  }, [bucketBrowser]);
 
   if (!files) {
     return <p>Waiting for buckets to be ready...</p>;
@@ -40,8 +34,13 @@ export const BucketSpace = (): JSX.Element => {
         <button onClick={getBucket}>Connect!</button>
       </div>
       <ul>
-        {files.map((bucketName, index): ReactElement => {
-          return <li key={index}>{bucketName}</li>;
+        {Array.from(files).map((bucketEntry, index): ReactElement => {
+          return (
+            <li key={index}>
+              <jupyterIcon.react tag={'span'} />
+              {bucketEntry.name}
+            </li>
+          );
         })}
       </ul>
     </>
