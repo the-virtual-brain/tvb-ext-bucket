@@ -7,8 +7,6 @@ import {
 
 import { ICommandPalette, WidgetTracker } from '@jupyterlab/apputils';
 
-import { INotebookTracker } from '@jupyterlab/notebook';
-
 import { IConsoleTracker } from '@jupyterlab/console';
 
 import { BucketWidget } from './BucketWidget';
@@ -19,13 +17,7 @@ import { BucketWidget } from './BucketWidget';
 const plugin: JupyterFrontEndPlugin<void> = {
   id: 'tvb-ext-bucket:plugin',
   autoStart: true,
-  requires: [
-    ICommandPalette,
-    ILayoutRestorer,
-    IConsoleTracker,
-    ILabShell,
-    INotebookTracker
-  ],
+  requires: [ICommandPalette, ILayoutRestorer, IConsoleTracker, ILabShell],
   activate: (
     app: JupyterFrontEnd,
     palette: ICommandPalette,
