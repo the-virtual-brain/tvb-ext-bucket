@@ -89,12 +89,6 @@
     "style/index.js"
   ],
   "styleModule": "style/index.js",
-  "stylelint": {
-    "rules": {
-      "selector-class-pattern": null,
-      "function-url-quotes": null
-    }
-  },
   "publishConfig": {
     "access": "public"
   },
