@@ -3,6 +3,10 @@
 
     https://jupyterlab.readthedocs.io/en/stable/developer/css.html
 */
+.bucket-container,
+.tvb-bucketWidget {
+  background-color: var(--jp-layout-color1);
+}
 
 .collab-logo {
   background-image: url(Collaboratory_EBRAINS.svg);
