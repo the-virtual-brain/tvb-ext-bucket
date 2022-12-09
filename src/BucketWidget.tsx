@@ -1,12 +1,10 @@
 import React, { ReactElement, useState, useCallback } from 'react';
 import { ReactWidget } from '@jupyterlab/apputils';
-import { jupyterIcon } from '@jupyterlab/ui-components';
 import { BucketFileBrowser } from './bucketFileBrowser';
+import { CollabSpaceEntry } from './CollabSpaceEntry';
 
 export const BucketSpace = (): JSX.Element => {
-  const [files, setFiles] = useState<Set<BucketFileBrowser.IBucketEntry>>(
-    new Set<BucketFileBrowser.IBucketEntry>()
-  );
+  const [files, setFiles] = useState<Array<BucketFileBrowser.IBucketEntry>>([]);
   const [bucketName, setBucketName] = useState<string>('');
 
   const bucketBrowser = new BucketFileBrowser({
@@ -34,12 +32,13 @@ export const BucketSpace = (): JSX.Element => {
         <button onClick={getBucket}>Connect!</button>
       </div>
       <ul>
-        {Array.from(files).map((bucketEntry, index): ReactElement => {
+        {files.map((bucketEntry): ReactElement => {
           return (
-            <li key={index}>
-              <jupyterIcon.react tag={'span'} />
-              {bucketEntry.name}
-            </li>
+            <CollabSpaceEntry
+              tag={'li'}
+              metadata={bucketEntry}
+              key={bucketEntry.name}
+            />
           );
         })}
       </ul>

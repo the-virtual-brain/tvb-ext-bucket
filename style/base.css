@@ -6,6 +6,19 @@
 .bucket-container,
 .tvb-bucketWidget {
   background-color: var(--jp-layout-color1);
+  list-style-type: none;
+}
+
+.bucket-container ul {
+  list-style-type: none;
+  padding-left: 1em;
+}
+
+.bucket-container ul > li {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
 }
 
 .collab-logo {

@@ -4,7 +4,7 @@ export class BucketFileBrowser {
   private readonly _bucket: string;
   private readonly _bucketEndpoint: string;
   private _currentDirectoryPath: string;
-  private _currentFiles: Set<BucketFileBrowser.IBucketEntry>;
+  private _currentFiles: Map<string, BucketFileBrowser.IBucketEntry>;
 
   /**
    * create a new BucketFileBrowser instance which allows browsing in the bucket provided in options
@@ -14,7 +14,7 @@ export class BucketFileBrowser {
     this._bucket = options.bucket;
     this._bucketEndpoint = options.bucketEndPoint;
     this._currentDirectoryPath = options.bucket;
-    this._currentFiles = new Set<BucketFileBrowser.IBucketEntry>();
+    this._currentFiles = new Map<string, BucketFileBrowser.IBucketEntry>();
   }
 
   /**
@@ -29,14 +29,16 @@ export class BucketFileBrowser {
    */
   async openBucket() {
     // make sure the current file set is empty before populating
-    this._currentFiles = new Set<BucketFileBrowser.IBucketEntry>();
+    this._currentFiles.clear();
     const firstLevelFiles =
       await requestAPI<BucketFileBrowser.IBucketStructureResponse>(
         `${this._bucketEndpoint}?bucket=${this._bucket}`
       );
     this._buildEntries(firstLevelFiles.files);
-
-    return this._currentFiles;
+    console.log('Current files: ', this._currentFiles);
+    const filesList = Array.from(this._currentFiles.values());
+    filesList.sort((a, b) => (!a.isFile && b.isFile ? -1 : 1)); // make sure entries are sorted file/folder
+    return filesList;
   }
 
   /**
@@ -65,7 +67,7 @@ export class BucketFileBrowser {
           isFile: true
         };
       }
-      this._currentFiles.add(entry);
+      this._currentFiles.set(entry.name, entry);
     }
   }
 }
