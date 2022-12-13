@@ -9,9 +9,17 @@
   list-style-type: none;
 }
 
+.bucket-BreadCrumbs {
+  display: flex;
+  flex-flow: row wrap;
+  align-items: center;
+  justify-content: flex-start;
+}
+
 .bucket-container ul {
   list-style-type: none;
-  padding-left: 1em;
+  padding: 0;
+  margin: 0;
 }
 
 .bucket-container ul > li {
@@ -19,6 +27,11 @@
   flex-direction: row;
   align-items: center;
   justify-content: flex-start;
+  padding-left: 1em;
+}
+
+.bucket-BrowserListItem:hover {
+  background-color: var(--jp-layout-color2);
 }
 
 .collab-logo {

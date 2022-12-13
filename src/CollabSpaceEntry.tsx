@@ -4,7 +4,8 @@ import { fileIcon, folderIcon } from '@jupyterlab/ui-components';
 
 export function CollabSpaceEntry({
   tag,
-  metadata
+  metadata,
+  onClick
 }: CollabSpaceEntry.IProps): JSX.Element {
   return (
     <Private.Wrapper tag={tag}>
@@ -21,7 +22,9 @@ export function CollabSpaceEntry({
           className={'jp-DirListing-itemIcon'}
         />
       )}
-      <p>{metadata.name}</p>
+      <p onClick={onClick} style={{ cursor: 'pointer' }}>
+        {metadata.name}
+      </p>
     </Private.Wrapper>
   );
 }
@@ -30,6 +33,7 @@ export namespace CollabSpaceEntry {
   export interface IProps {
     tag: 'li' | 'div';
     metadata: BucketFileBrowser.IBucketEntry;
+    onClick?: () => void;
   }
 }
 
@@ -42,6 +46,14 @@ namespace Private {
     tag,
     children
   }): JSX.Element => {
-    return <>{tag === 'li' ? <li>{children}</li> : <div>{children}</div>}</>;
+    return (
+      <>
+        {tag === 'li' ? (
+          <li className={'bucket-BrowserListItem'}>{children}</li>
+        ) : (
+          <div>{children}</div>
+        )}
+      </>
+    );
   };
 }

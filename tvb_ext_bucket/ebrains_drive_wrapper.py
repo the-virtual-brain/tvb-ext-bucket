@@ -19,6 +19,25 @@ LOGGER = get_logger(__name__)
 TOKEN_ENV_VAR = 'CLB_AUTH'
 
 
+def clear_prefix(text, prefix):
+    # type: (str, str) -> str
+    """
+    function to remove prefix from a string
+    Parameters
+    ----------
+    text: string to have prefix removed
+    prefix: string to be removed at the start of text
+
+    Returns
+    -------
+    text without prefix as string
+    """
+    text_new = text
+    if text.startswith(prefix):
+        text_new = text[len(prefix):]
+    return text_new
+
+
 def get_collab_token():
     try:
         from clb_nb_utils import oauth as clb_oauth
@@ -42,11 +61,12 @@ class BucketWrapper:
     def __init__(self):
         self.client = self.get_client()
 
-    def get_files_in_bucket(self, bucket_name):
-        # type: (str) -> list[str]
+    def get_files_in_bucket(self, bucket_name, prefix=''):
+        # type: (str, str) -> list[str]
         """
         Gets the list of files in a bucket space
-        :param bucket_name:
+        :param bucket_name: name of the bucket as string
+        :param prefix: path-like string
         :return:
         """
         LOGGER.info(f'Getting bucket {bucket_name}')
@@ -56,7 +76,9 @@ class BucketWrapper:
         except Unauthorized as e:
             LOGGER.error(f'Could not access bucket {bucket_name} due to {e}')
             raise CollabAccessError(e)
-        return [f.name for f in bucket.ls()]
+        # remove the prefix from the list of files
+        files_list = [clear_prefix(f.name, prefix) for f in bucket.ls(prefix=prefix)]
+        return files_list
 
     def get_client(self):
         try:

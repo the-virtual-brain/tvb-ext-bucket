@@ -1,10 +1,10 @@
 import { requestAPI } from './handler';
 
 export class BucketFileBrowser {
-  private readonly _bucket: string;
+  private _bucket: string;
   private readonly _bucketEndpoint: string;
-  private _currentDirectoryPath: string;
-  private _currentFiles: Map<string, BucketFileBrowser.IBucketEntry>;
+  private _currentDirectoryPath: Array<string> = ['/'];
+  private readonly _currentFiles: Map<string, BucketFileBrowser.IBucketEntry>;
 
   /**
    * create a new BucketFileBrowser instance which allows browsing in the bucket provided in options
@@ -13,39 +13,65 @@ export class BucketFileBrowser {
   constructor(options: BucketFileBrowser.IOptions) {
     this._bucket = options.bucket;
     this._bucketEndpoint = options.bucketEndPoint;
-    this._currentDirectoryPath = options.bucket;
     this._currentFiles = new Map<string, BucketFileBrowser.IBucketEntry>();
+  }
+
+  public get bucket() {
+    return this._bucket;
+  }
+
+  public set bucket(name: string) {
+    this._bucket = name;
   }
 
   /**
    * get current file browser path
    */
-  get currentDirectoryPath(): string {
+  get currentDirectoryPath(): Array<string> {
     return this._currentDirectoryPath;
+  }
+
+  /**
+   * get current files sorted
+   */
+  private _sortedFiles(
+    files: Array<string>
+  ): Array<BucketFileBrowser.IBucketEntry> {
+    this._buildEntries(files);
+    const entriesList = Array.from(this._currentFiles.values());
+    entriesList.sort((a, b) => (!a.isFile && b.isFile ? -1 : 1));
+    return entriesList;
   }
 
   /**
    * method to get the first level of folders and files in the bucket
    */
-  async openBucket() {
+  async openBucket(): Promise<Array<BucketFileBrowser.IBucketEntry>> {
     // make sure the current file set is empty before populating
     this._currentFiles.clear();
+    this._currentDirectoryPath = [this.currentDirectoryPath[0]]; // current path is '/'
     const firstLevelFiles =
       await requestAPI<BucketFileBrowser.IBucketStructureResponse>(
         `${this._bucketEndpoint}?bucket=${this._bucket}`
       );
-    this._buildEntries(firstLevelFiles.files);
-    console.log('Current files: ', this._currentFiles);
-    const filesList = Array.from(this._currentFiles.values());
-    filesList.sort((a, b) => (!a.isFile && b.isFile ? -1 : 1)); // make sure entries are sorted file/folder
-    return filesList;
+    return this._sortedFiles(firstLevelFiles.files);
   }
 
   /**
    * method to get next level of files/directories from a directory
    */
-  async openDirectory(directory: string) {
-    this._currentDirectoryPath += `${directory}/`;
+  async cd(directory: string): Promise<Array<BucketFileBrowser.IBucketEntry>> {
+    this._currentFiles.clear();
+    this._currentDirectoryPath.push(`${directory}/`);
+    const prefix = this.currentDirectoryPath.reduce(
+      (acc, curr) => curr + acc,
+      ''
+    );
+    const contents =
+      await requestAPI<BucketFileBrowser.IBucketStructureResponse>(
+        `${this._bucketEndpoint}?bucket=${this._bucket}&prefix=${prefix}`
+      );
+    return this._sortedFiles(contents.files);
   }
 
   /**
