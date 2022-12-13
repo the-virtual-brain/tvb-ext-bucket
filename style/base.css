@@ -16,6 +16,15 @@
   justify-content: flex-start;
 }
 
+.bucket-BreadCrumbs-Item {
+  cursor: pointer;
+  color: var(--md-blue-500);
+}
+
+.bucket-BreadCrumbs-Item:hover {
+  background-color: var(--jp-layout-color2);
+}
+
 .bucket-container ul {
   list-style-type: none;
   padding: 0;

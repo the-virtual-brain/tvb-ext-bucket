@@ -61,8 +61,19 @@ export const BucketSpace = (): JSX.Element => {
 
       <div className={'bucket-BreadCrumbs'}>
         <folderIcon.react tag="span" className={'bucket-home'} />
-        {bucketBrowserRef.current.currentDirectoryPath.map(dir => {
-          return <span key={dir}>{dir}</span>;
+        {bucketBrowserRef.current.breadcrumbs.map(dir => {
+          return (
+            <span
+              key={dir}
+              className={'bucket-BreadCrumbs-Item'}
+              onClick={withSpinnerDecorator(async () => {
+                const files = await bucketBrowserRef.current.goTo(dir);
+                setFiles(files);
+              })}
+            >
+              {dir}/
+            </span>
+          );
         })}
       </div>
 
@@ -71,17 +82,23 @@ export const BucketSpace = (): JSX.Element => {
       ) : (
         <ul>
           {files.map((bucketEntry): ReactElement => {
+            let onClick = () => {
+              return;
+            };
+            if (!bucketEntry.isFile) {
+              onClick = withSpinnerDecorator(async () => {
+                const files = await bucketBrowserRef.current.cd(
+                  bucketEntry.name
+                );
+                setFiles(files);
+              });
+            }
             return (
               <CollabSpaceEntry
                 tag={'li'}
                 metadata={bucketEntry}
                 key={bucketEntry.name}
-                onClick={withSpinnerDecorator(async () => {
-                  const files = await bucketBrowserRef.current.cd(
-                    bucketEntry.name
-                  );
-                  setFiles(files);
-                })}
+                onClick={onClick}
               />
             );
           })}

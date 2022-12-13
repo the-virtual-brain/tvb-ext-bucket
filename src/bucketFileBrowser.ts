@@ -3,7 +3,7 @@ import { requestAPI } from './handler';
 export class BucketFileBrowser {
   private _bucket: string;
   private readonly _bucketEndpoint: string;
-  private _currentDirectoryPath: Array<string> = ['/'];
+  private _breadcrumbs: Array<string> = [];
   private readonly _currentFiles: Map<string, BucketFileBrowser.IBucketEntry>;
 
   /**
@@ -27,8 +27,8 @@ export class BucketFileBrowser {
   /**
    * get current file browser path
    */
-  get currentDirectoryPath(): Array<string> {
-    return this._currentDirectoryPath;
+  get breadcrumbs(): Array<string> {
+    return this._breadcrumbs;
   }
 
   /**
@@ -49,7 +49,7 @@ export class BucketFileBrowser {
   async openBucket(): Promise<Array<BucketFileBrowser.IBucketEntry>> {
     // make sure the current file set is empty before populating
     this._currentFiles.clear();
-    this._currentDirectoryPath = [this.currentDirectoryPath[0]]; // current path is '/'
+    this._breadcrumbs = []; // current path is '/'
     const firstLevelFiles =
       await requestAPI<BucketFileBrowser.IBucketStructureResponse>(
         `${this._bucketEndpoint}?bucket=${this._bucket}`
@@ -62,16 +62,33 @@ export class BucketFileBrowser {
    */
   async cd(directory: string): Promise<Array<BucketFileBrowser.IBucketEntry>> {
     this._currentFiles.clear();
-    this._currentDirectoryPath.push(`${directory}/`);
-    const prefix = this.currentDirectoryPath.reduce(
-      (acc, curr) => curr + acc,
-      ''
-    );
+    this._breadcrumbs.push(`${directory}`);
+    const prefix = this.breadcrumbs.reduce((acc, curr) => acc + curr + '/', '');
+    console.log('Going to files in: ', prefix);
     const contents =
       await requestAPI<BucketFileBrowser.IBucketStructureResponse>(
         `${this._bucketEndpoint}?bucket=${this._bucket}&prefix=${prefix}`
       );
     return this._sortedFiles(contents.files);
+  }
+
+  /**
+   * opens a directory from breadcrumbs
+   * @param directory
+   */
+  async goTo(
+    directory: string
+  ): Promise<Array<BucketFileBrowser.IBucketEntry>> {
+    if (!this._breadcrumbs.includes(directory)) {
+      throw new Error(`Could not find breadcrumb ${directory}`);
+    }
+
+    this._breadcrumbs = this._breadcrumbs.slice(
+      0,
+      this._breadcrumbs.indexOf(directory)
+    );
+
+    return this.cd(directory);
   }
 
   /**
