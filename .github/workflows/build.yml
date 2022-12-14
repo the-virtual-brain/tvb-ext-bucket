@@ -12,6 +12,7 @@ jobs:
     runs-on: ubuntu-latest
 
     strategy:
+      fail-fast: false
       matrix:
         python-version: [ "3.8", "3.9", "3.10" ]
 
@@ -23,7 +24,7 @@ jobs:
       uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
 
     - name: Install dependencies
-      run: python -m pip install -U jupyterlab~=3.1 pytest pytest_tornasync pytest-cov
+      run: python -m pip install -U jupyterlab~=3.1 ebrains-drive pytest pytest-mock pytest-jupyter pytest_tornasync pytest-cov
 
     - name: Lint the extension
       run: |
@@ -41,9 +42,9 @@ jobs:
         set -eux
         python -m pip install .
 
-        pytest -vv -r ap --cov tvb-ext-bucket
+        pytest -vv -r ap --cov tvb_ext_bucket
         jupyter server extension list
-        jupyter server extension list 2>&1 | grep -ie "tvb-ext-bucket.*OK"
+        jupyter server extension list 2>&1 | grep -ie "tvb_ext_bucket.*OK"
 
         jupyter labextension list
         jupyter labextension list 2>&1 | grep -ie "tvb-ext-bucket.*OK"
@@ -74,7 +75,7 @@ jobs:
     - name: Install Python
       uses: actions/setup-python@v2
       with:
-        python-version: '3.9'
+        python-version: '3.8'
         architecture: 'x64'
     - uses: actions/download-artifact@v2
       with:
@@ -90,7 +91,7 @@ jobs:
 
 
         jupyter server extension list
-        jupyter server extension list 2>&1 | grep -ie "tvb-ext-bucket.*OK"
+        jupyter server extension list 2>&1 | grep -ie "tvb_ext_bucket.*OK"
 
         jupyter labextension list
         jupyter labextension list 2>&1 | grep -ie "tvb-ext-bucket.*OK"

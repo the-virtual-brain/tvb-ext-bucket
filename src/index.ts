@@ -1,9 +1,15 @@
 import {
+  ILabShell,
+  ILayoutRestorer,
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
-import { requestAPI } from './handler';
+import { ICommandPalette, WidgetTracker } from '@jupyterlab/apputils';
+
+import { IConsoleTracker } from '@jupyterlab/console';
+
+import { BucketWidget } from './BucketWidget';
 
 /**
  * Initialization data for the tvb-ext-bucket extension.
@@ -11,18 +17,34 @@ import { requestAPI } from './handler';
 const plugin: JupyterFrontEndPlugin<void> = {
   id: 'tvb-ext-bucket:plugin',
   autoStart: true,
-  activate: (app: JupyterFrontEnd) => {
+  requires: [ICommandPalette, ILayoutRestorer, IConsoleTracker, ILabShell],
+  activate: (
+    app: JupyterFrontEnd,
+    palette: ICommandPalette,
+    restorer: ILayoutRestorer,
+    consoleTracker: IConsoleTracker,
+    labShell: ILabShell
+  ) => {
     console.log('JupyterLab extension tvb-ext-bucket is activated!');
 
-    requestAPI<any>('get_example')
-      .then(data => {
-        console.log(data);
-      })
-      .catch(reason => {
-        console.error(
-          `The tvb-ext-bucket server extension appears to be missing.\n${reason}`
-        );
-      });
+    const id = 'tvb-ext-bucket';
+    const sidebar = new BucketWidget();
+    sidebar.id = id;
+    sidebar.title.iconClass = 'bucket-CollabLogo jp-SideBar-tabIcon';
+    sidebar.title.caption = 'Bucket';
+    const command = 'tvbextbucket:open';
+
+    labShell.add(sidebar, 'right', { rank: 200 });
+
+    const tracker = new WidgetTracker<BucketWidget>({
+      namespace: 'bucket'
+    });
+
+    restorer.add(sidebar, id);
+    restorer.restore(tracker, {
+      command,
+      name: () => 'bucket'
+    });
   }
 };
 
