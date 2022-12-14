@@ -65,6 +65,7 @@
     "@babel/preset-env": "^7.0.0",
     "@jupyterlab/builder": "^3.1.0",
     "@jupyterlab/testutils": "^3.0.0",
+    "@testing-library/react": "12.1.5",
     "@types/jest": "^26.0.0",
     "@typescript-eslint/eslint-plugin": "^4.8.1",
     "@typescript-eslint/parser": "^4.8.1",

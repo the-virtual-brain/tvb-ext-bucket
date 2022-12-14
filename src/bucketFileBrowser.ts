@@ -1,4 +1,5 @@
 import { requestAPI } from './handler';
+import { BreadCrumbNotFoundError } from './exceptions';
 
 export class BucketFileBrowser {
   private _bucket: string;
@@ -80,7 +81,9 @@ export class BucketFileBrowser {
     directory: string
   ): Promise<Array<BucketFileBrowser.IBucketEntry>> {
     if (!this._breadcrumbs.includes(directory)) {
-      throw new Error(`Could not find breadcrumb ${directory}`);
+      throw new BreadCrumbNotFoundError(
+        `Could not find breadcrumb ${directory}`
+      );
     }
 
     this._breadcrumbs = this._breadcrumbs.slice(
