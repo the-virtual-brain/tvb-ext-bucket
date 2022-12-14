@@ -17,7 +17,7 @@ export class BucketFileBrowser {
     this._currentFiles = new Map<string, BucketFileBrowser.IBucketEntry>();
   }
 
-  public get bucket() {
+  public get bucket(): string {
     return this._bucket;
   }
 
@@ -99,7 +99,7 @@ export class BucketFileBrowser {
    * @param filesList
    * @private
    */
-  private _buildEntries(filesList: Array<string>) {
+  private _buildEntries(filesList: Array<string>): void {
     for (const path of filesList) {
       let entry;
       if (path.includes('/')) {
