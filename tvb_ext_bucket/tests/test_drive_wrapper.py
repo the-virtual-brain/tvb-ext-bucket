@@ -1,3 +1,10 @@
+# -*- coding: utf-8 -*-
+#
+# "TheVirtualBrain - Widgets" package
+#
+# (c) 2022-2023, TVB Widgets Team
+#
+
 from tvb_ext_bucket.ebrains_drive_wrapper import BucketWrapper
 
 
