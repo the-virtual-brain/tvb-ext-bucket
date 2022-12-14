@@ -1,3 +1,10 @@
+# -*- coding: utf-8 -*-
+#
+# "TheVirtualBrain - Widgets" package
+#
+# (c) 2022-2023, TVB Widgets Team
+#
+
 import json
 
 from jupyter_server.base.handlers import APIHandler
@@ -22,8 +29,11 @@ class BucketsHandler(APIHandler):
         }
         try:
             bucket_name = self.get_argument('bucket')
+            LOGGER.info(f'OPEN bucket {json.dumps(bucket_name)}')
+            prefix = self.get_argument('prefix', '')
+            LOGGER.info(f'SEARCH in {json.dumps(prefix)}')
             bucket_wraper = BucketWrapper()
-            response['files'] = bucket_wraper.get_files_in_bucket(bucket_name)
+            response['files'] = bucket_wraper.get_files_in_bucket(bucket_name, prefix=prefix)
         except MissingArgumentError:
             response['message'] = 'No collab name provided!'
         except TokenExpired as e:
@@ -31,6 +41,7 @@ class BucketsHandler(APIHandler):
             response['message'] = 'Error on getting buckets, your collab token is expired!'
         except CollabAccessError as e:
             response['message'] = e.message
+        LOGGER.info("RESPONSE: ", json.dumps(response))
         self.finish(json.dumps(response))
 
 

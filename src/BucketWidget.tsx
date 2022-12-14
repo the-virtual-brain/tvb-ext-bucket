@@ -1,32 +1,51 @@
-import React, { ReactElement, useState } from 'react';
+import React, {
+  ReactElement,
+  useState,
+  useCallback,
+  useRef,
+  useEffect
+} from 'react';
 import { ReactWidget } from '@jupyterlab/apputils';
-import { requestAPI } from './handler';
-
-export namespace types {
-  export interface IBucketResponse {
-    message: string;
-    files: Array<string>;
-  }
-}
+import { BucketFileBrowser } from './bucketFileBrowser';
+import { CollabSpaceEntry } from './CollabSpaceEntry';
+import { folderIcon } from '@jupyterlab/ui-components';
+import { JpSpinner } from './JpSpinner';
 
 export const BucketSpace = (): JSX.Element => {
-  const [files, setFiles] = useState<Array<string>>([]);
+  const [files, setFiles] = useState<Array<BucketFileBrowser.IBucketEntry>>([]);
   const [bucketName, setBucketName] = useState<string>('');
+  const [showSpinner, setShowSpinner] = useState<boolean>(false);
+  const bucketBrowserRef = useRef<BucketFileBrowser>(
+    new BucketFileBrowser({
+      bucketEndPoint: 'buckets',
+      bucket: bucketName
+    })
+  );
 
-  const getBucket = () => {
-    requestAPI<types.IBucketResponse>(`buckets?bucket=${bucketName}`)
-      .then(response => {
-        setFiles(response.files);
-        console.log(response.message);
-      })
-      .catch(err => {
-        console.log('Got Error! : ', err);
+  /**
+   * decorator for async functions to show a spinner instead of the dir structure while they resolve
+   */
+  const withSpinnerDecorator = useCallback((callback: () => Promise<any>) => {
+    const decoratedFn = () => {
+      setShowSpinner(true);
+      callback().then(() => {
+        setShowSpinner(false);
       });
-  };
+    };
+    return decoratedFn;
+  }, []);
 
-  if (!files) {
-    return <p>Waiting for buckets to be ready...</p>;
-  }
+  const getBucket = useCallback(
+    withSpinnerDecorator(async () => {
+      const files = await bucketBrowserRef.current.openBucket(); //.then(files => setFiles(files));
+      setFiles(files);
+    }),
+    [bucketBrowserRef]
+  );
+
+  useEffect(() => {
+    bucketBrowserRef.current.bucket = bucketName;
+  }, [bucketName]);
 
   return (
     <>
@@ -39,11 +58,52 @@ export const BucketSpace = (): JSX.Element => {
         />
         <button onClick={getBucket}>Connect!</button>
       </div>
-      <ul>
-        {files.map((bucketName, index): ReactElement => {
-          return <li key={index}>{bucketName}</li>;
+
+      <div className={'bucket-BreadCrumbs'}>
+        <folderIcon.react tag="span" className={'bucket-home'} />
+        {bucketBrowserRef.current.breadcrumbs.map(dir => {
+          return (
+            <span
+              key={dir}
+              className={'bucket-BreadCrumbs-Item'}
+              onClick={withSpinnerDecorator(async () => {
+                const files = await bucketBrowserRef.current.goTo(dir);
+                setFiles(files);
+              })}
+            >
+              {dir}/
+            </span>
+          );
         })}
-      </ul>
+      </div>
+
+      {showSpinner ? (
+        <JpSpinner />
+      ) : (
+        <ul>
+          {files.map((bucketEntry): ReactElement => {
+            let onClick = () => {
+              return;
+            };
+            if (!bucketEntry.isFile) {
+              onClick = withSpinnerDecorator(async () => {
+                const files = await bucketBrowserRef.current.cd(
+                  bucketEntry.name
+                );
+                setFiles(files);
+              });
+            }
+            return (
+              <CollabSpaceEntry
+                tag={'li'}
+                metadata={bucketEntry}
+                key={bucketEntry.name}
+                onClick={onClick}
+              />
+            );
+          })}
+        </ul>
+      )}
     </>
   );
 };

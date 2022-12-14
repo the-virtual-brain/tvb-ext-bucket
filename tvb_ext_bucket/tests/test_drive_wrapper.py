@@ -1,8 +1,16 @@
+# -*- coding: utf-8 -*-
+#
+# "TheVirtualBrain - Widgets" package
+#
+# (c) 2022-2023, TVB Widgets Team
+#
+
 from tvb_ext_bucket.ebrains_drive_wrapper import BucketWrapper
 
 
 class MockFile:
     def __init__(self, name):
+        # type: (str) -> None
         self.name = name
 
 
@@ -11,8 +19,8 @@ class MockBucket:
         self.name = name
         self.files = [MockFile(f'file{number}') for number in range(files_count)]
 
-    def ls(self):
-        return self.files
+    def ls(self, prefix=''):
+        return [f for f in self.files if f.name.startswith(prefix)]
 
 
 class MockBuckets:
