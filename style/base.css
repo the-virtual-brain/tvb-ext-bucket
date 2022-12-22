@@ -43,6 +43,45 @@
   background-color: var(--jp-layout-color2);
 }
 
+.bucket-ContextMenu-container {
+  position: relative;
+}
+
+.bucket-ContextMenu {
+  position: absolute;
+  top: 10px;
+  left: 5px;
+  z-index: 10000;
+  padding: 4px 0;
+  font-size: var(--jp-ui-font-size1);
+  background: var(--jp-layout-color0);
+  color: var(--jp-ui-font-color1);
+  border: var(--jp-border-width) solid var(--jp-ui-font-size1);
+  box-shadow: var(--jp-elevation-z6);
+  white-space: nowrap;
+  overflow-x: hidden;
+  overflow-y: auto;
+  outline: none;
+  opacity: 1;
+  width: 200px;
+}
+
+.bucket-ContextMenu-item {
+  min-height: var(--jp-private-menu-item-height);
+  max-height: var(--jp-private-menu-item-height);
+  line-height: var(--jp-private-menu-item-height);
+}
+
+.bucket-ContextMenu-item div {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bucket-ContextMenu li:hover {
+  background-color: var(--jp-layout-color2);
+}
+
 .collab-logo {
   background-image: url(Collaboratory_EBRAINS.svg);
   background-repeat: no-repeat;
@@ -50,5 +89,6 @@
 }
 
 .bucket-CollabLogo {
-  background-image: url(ebrains_logo.png);
+  background-image: url(hdd-o-4.svg);
+  filter: opacity(70%);
 }

@@ -1,5 +1,6 @@
 import React from 'react';
 import { BucketFileBrowser } from './bucketFileBrowser';
+import { ContextMenu } from './ContextMenu';
 import { fileIcon, folderIcon } from '@jupyterlab/ui-components';
 
 export function CollabSpaceEntry({
@@ -22,9 +23,11 @@ export function CollabSpaceEntry({
           className={'jp-DirListing-itemIcon'}
         />
       )}
-      <p onClick={onClick} style={{ cursor: 'pointer' }}>
-        {metadata.name}
-      </p>
+      <ContextMenu name={metadata.name}>
+        <p onClick={onClick} style={{ cursor: 'pointer' }}>
+          {metadata.name}
+        </p>
+      </ContextMenu>
     </Private.Wrapper>
   );
 }
