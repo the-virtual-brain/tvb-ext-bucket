@@ -61,6 +61,16 @@ class BucketWrapper:
     def __init__(self):
         self.client = self.get_client()
 
+    def _get_bucket(self, bucket_name):
+        LOGGER.info(f'Getting bucket {bucket_name}')
+        try:
+            bucket = self.client.buckets.get_bucket(bucket_name)
+            LOGGER.info('Bucket retrieved successfully.')
+        except Unauthorized as e:
+            LOGGER.error(f'Could not access bucket {bucket_name} due to {e}')
+            raise CollabAccessError(e)
+        return bucket
+
     def get_files_in_bucket(self, bucket_name, prefix=''):
         # type: (str, str) -> list[str]
         """
@@ -69,13 +79,7 @@ class BucketWrapper:
         :param prefix: path-like string
         :return:
         """
-        LOGGER.info(f'Getting bucket {bucket_name}')
-        try:
-            bucket = self.client.buckets.get_bucket(bucket_name)
-            LOGGER.info('Bucket retrieved successfully.')
-        except Unauthorized as e:
-            LOGGER.error(f'Could not access bucket {bucket_name} due to {e}')
-            raise CollabAccessError(e)
+        bucket = self._get_bucket(bucket_name)
         # remove the prefix from the list of files
         files_list = [clear_prefix(f.name, prefix) for f in bucket.ls(prefix=prefix)]
         return files_list
@@ -91,3 +95,16 @@ class BucketWrapper:
         if not token:
             raise CollabTokenError('Failed to connect to EBRAINS! Could not find token!')
         return BucketApiClient(token=token)
+
+    def download_file(self, file_path, bucket_name):
+        LOGGER.info(f'DOWNLOADING: attempt to download {file_path} from bucket {bucket_name}')
+        bucket = self._get_bucket(bucket_name)
+        dataproxy_file = next((f for f in bucket.ls() if f.name == file_path), None)
+        LOGGER.info(f'FOUND: File found: {dataproxy_file}')
+        if dataproxy_file is None:
+            return False
+        file_name = file_path.split('/')[-1]
+        with open(file_name, 'wb') as f:
+            content = dataproxy_file.get_content()
+            f.write(content)
+        return True

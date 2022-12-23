@@ -1,26 +1,16 @@
-import React, {
-  ReactElement,
-  useState,
-  useCallback,
-  useRef,
-  useEffect
-} from 'react';
+import React, { ReactElement, useState, useCallback, useEffect } from 'react';
 import { ReactWidget } from '@jupyterlab/apputils';
 import { BucketFileBrowser } from './bucketFileBrowser';
 import { CollabSpaceEntry } from './CollabSpaceEntry';
 import { folderIcon } from '@jupyterlab/ui-components';
 import { JpSpinner } from './JpSpinner';
+import { BucketContextProvider, useBucketContext } from './BucketContext';
 
 export const BucketSpace = (): JSX.Element => {
   const [files, setFiles] = useState<Array<BucketFileBrowser.IBucketEntry>>([]);
   const [bucketName, setBucketName] = useState<string>('');
   const [showSpinner, setShowSpinner] = useState<boolean>(false);
-  const bucketBrowserRef = useRef<BucketFileBrowser>(
-    new BucketFileBrowser({
-      bucketEndPoint: 'buckets',
-      bucket: bucketName
-    })
-  );
+  const bucketBrowser = useBucketContext().fileBrowser;
 
   /**
    * decorator for async functions to show a spinner instead of the dir structure while they resolve
@@ -37,14 +27,14 @@ export const BucketSpace = (): JSX.Element => {
 
   const getBucket = useCallback(
     withSpinnerDecorator(async () => {
-      const files = await bucketBrowserRef.current.openBucket(); //.then(files => setFiles(files));
+      const files = await bucketBrowser.openBucket(); //.then(files => setFiles(files));
       setFiles(files);
     }),
-    [bucketBrowserRef]
+    [bucketBrowser]
   );
 
   useEffect(() => {
-    bucketBrowserRef.current.bucket = bucketName;
+    bucketBrowser.bucket = bucketName;
   }, [bucketName]);
 
   return (
@@ -61,13 +51,13 @@ export const BucketSpace = (): JSX.Element => {
 
       <div className={'bucket-BreadCrumbs'}>
         <folderIcon.react tag="span" className={'bucket-home'} />
-        {bucketBrowserRef.current.breadcrumbs.map(dir => {
+        {bucketBrowser.breadcrumbs.map(dir => {
           return (
             <span
               key={dir}
               className={'bucket-BreadCrumbs-Item'}
               onClick={withSpinnerDecorator(async () => {
-                const files = await bucketBrowserRef.current.goTo(dir);
+                const files = await bucketBrowser.goTo(dir);
                 setFiles(files);
               })}
             >
@@ -87,9 +77,7 @@ export const BucketSpace = (): JSX.Element => {
             };
             if (!bucketEntry.isFile) {
               onClick = withSpinnerDecorator(async () => {
-                const files = await bucketBrowserRef.current.cd(
-                  bucketEntry.name
-                );
+                const files = await bucketBrowser.cd(bucketEntry.name);
                 setFiles(files);
               });
             }
@@ -117,7 +105,9 @@ export class BucketWidget extends ReactWidget {
   protected render(): ReactElement | null {
     return (
       <div className={'bucket-container'}>
-        <BucketSpace />
+        <BucketContextProvider>
+          <BucketSpace />
+        </BucketContextProvider>
       </div>
     );
   }
