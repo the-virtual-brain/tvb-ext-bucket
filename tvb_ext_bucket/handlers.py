@@ -62,6 +62,10 @@ class DownloadHandler(APIHandler):
         except MissingArgumentError as e:
             response['message'] = e.log_message
             self.finish(response)
+        except FileExistsError as e:
+            response['message'] = f'File {file_path.split("/")[-1]} already exists! Please move or ' \
+                                  f'rename the existing file and try again!'
+            self.finish(response)
 
 
 def setup_handlers(web_app):

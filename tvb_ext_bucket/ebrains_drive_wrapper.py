@@ -99,12 +99,13 @@ class BucketWrapper:
     def download_file(self, file_path, bucket_name):
         LOGGER.info(f'DOWNLOADING: attempt to download {file_path} from bucket {bucket_name}')
         bucket = self._get_bucket(bucket_name)
+        # find first dataproxy file corresponding to provided path
         dataproxy_file = next((f for f in bucket.ls() if f.name == file_path), None)
         LOGGER.info(f'FOUND: File found: {dataproxy_file}')
         if dataproxy_file is None:
             return False
         file_name = file_path.split('/')[-1]
-        with open(file_name, 'wb') as f:
+        with open(file_name, 'xb') as f:
             content = dataproxy_file.get_content()
             f.write(content)
         return True

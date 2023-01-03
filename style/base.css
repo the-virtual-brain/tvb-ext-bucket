@@ -3,6 +3,38 @@
 
     https://jupyterlab.readthedocs.io/en/stable/developer/css.html
 */
+
+/* --------- SPIN ANIMATION ---------- */
+@keyframes spin {
+  from {
+    -moz-transform: rotate(0deg);
+  }
+
+  to {
+    -moz-transform: rotate(360deg);
+  }
+}
+@keyframes spin {
+  from {
+    -webkit-transform: rotate(0deg);
+  }
+
+  to {
+    -webkit-transform: rotate(360deg);
+  }
+}
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* --------- END SPIN ANIMATION ---------- */
+
 .bucket-container,
 .tvb-bucketWidget {
   background-color: var(--jp-layout-color1);
@@ -91,4 +123,15 @@
 .bucket-CollabLogo {
   background-image: url(hdd-o-4.svg);
   filter: opacity(70%);
+}
+
+.bucket-Spinner {
+  display: inline-block;
+  border: 3px solid #7f7f7f;
+  border-left: 3px solid #4ec261;
+  height: 1em;
+  width: 1em;
+  border-radius: 50%;
+  margin: 0 0.5em;
+  animation: spin 0.5s infinite linear;
 }

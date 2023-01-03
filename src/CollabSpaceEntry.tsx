@@ -23,11 +23,18 @@ export function CollabSpaceEntry({
           className={'jp-DirListing-itemIcon'}
         />
       )}
-      <ContextMenu name={metadata.name}>
+      {/* Add context menu only to files */}
+      {metadata.isFile ? (
+        <ContextMenu name={metadata.name}>
+          <p onClick={onClick} style={{ cursor: 'pointer' }}>
+            {metadata.name}
+          </p>
+        </ContextMenu>
+      ) : (
         <p onClick={onClick} style={{ cursor: 'pointer' }}>
           {metadata.name}
         </p>
-      </ContextMenu>
+      )}
     </Private.Wrapper>
   );
 }

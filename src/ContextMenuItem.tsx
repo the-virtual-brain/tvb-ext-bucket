@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 import { LabIcon } from '@jupyterlab/ui-components';
 
 export const ContextMenuItem: React.FC<ContextMenuItem.IProps> = ({
@@ -6,18 +6,29 @@ export const ContextMenuItem: React.FC<ContextMenuItem.IProps> = ({
   action,
   icon
 }): JSX.Element => {
+  const [loading, setLoading] = useState<boolean>(false);
+  const handleAction = useCallback(async () => {
+    setLoading(true);
+    await action();
+    setLoading(false);
+  }, []);
+
   return (
-    <li onClick={action} className={'bucket-ContextMenu-item'}>
+    <li onClick={handleAction} className={'bucket-ContextMenu-item'}>
       {icon && <icon.react />}
       <p>{label}</p>
+      {loading && <span className={'bucket-Spinner'}></span>}
     </li>
   );
 };
 
 export namespace ContextMenuItem {
+  export type AsyncFunc = () => Promise<void>;
+  export type Func = () => void;
+
   export interface IProps {
     label: string;
-    action: () => void;
+    action: Func | AsyncFunc;
     icon?: LabIcon;
   }
 }

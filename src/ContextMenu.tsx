@@ -22,7 +22,10 @@ export const ContextMenu: React.FC<ContextMenu.IProps> = ({
 
   const download = useCallback(async () => {
     try {
-      const filePath = `${browser.breadcrumbs.join('/')}/${name}`;
+      let filePath = name;
+      if (browser.breadcrumbs.length > 0) {
+        filePath = `${browser.breadcrumbs.join('/')}/${name}`;
+      }
 
       const resp = await requestAPI<Private.IDownloadResponse>(
         `download?file=${encodeURIComponent(filePath)}&bucket=${browser.bucket}`
