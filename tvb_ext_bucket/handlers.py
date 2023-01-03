@@ -41,7 +41,6 @@ class BucketsHandler(APIHandler):
             response['message'] = 'Error on getting buckets, your collab token is expired!'
         except CollabAccessError as e:
             response['message'] = e.message
-        LOGGER.info("RESPONSE: ", json.dumps(response))
         self.finish(json.dumps(response))
 
 

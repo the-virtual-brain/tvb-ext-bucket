@@ -1,6 +1,7 @@
 import {BucketSpace} from "../BucketWidget";
 import {cleanup, fireEvent, render, waitFor} from '@testing-library/react';
 import React from "react";
+import {BucketContextProvider} from "../BucketContext";
 
 jest.mock('../handler', () => {
   return {
@@ -20,7 +21,7 @@ afterEach(cleanup);
 
 describe('Test BucketWidget.tsx', () => {
     it('tests BucketSpace', async () => {
-        const {getByText} = render(<BucketSpace/>)
+        const {getByText} = render(<BucketContextProvider><BucketSpace/></BucketContextProvider>)
         expect(getByText(/Connect!/i)).toBeTruthy();
         await waitFor(() => fireEvent.click(getByText(/Connect!/i)));
         // fireEvent.click(getByText(/Connect!/i));
