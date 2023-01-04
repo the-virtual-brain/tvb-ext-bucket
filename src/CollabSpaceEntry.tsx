@@ -2,6 +2,7 @@ import React from 'react';
 import { BucketFileBrowser } from './bucketFileBrowser';
 import { ContextMenu } from './ContextMenu';
 import { fileIcon, folderIcon } from '@jupyterlab/ui-components';
+import { DragDownload } from './DragDownload';
 
 export function CollabSpaceEntry({
   tag,
@@ -26,9 +27,11 @@ export function CollabSpaceEntry({
       {/* Add context menu only to files */}
       {metadata.isFile ? (
         <ContextMenu name={metadata.name}>
-          <p onClick={onClick} style={{ cursor: 'pointer' }}>
-            {metadata.name}
-          </p>
+          <DragDownload name={metadata.name}>
+            <p onClick={onClick} style={{ cursor: 'pointer' }}>
+              {metadata.name}
+            </p>
+          </DragDownload>
         </ContextMenu>
       ) : (
         <p onClick={onClick} style={{ cursor: 'pointer' }}>

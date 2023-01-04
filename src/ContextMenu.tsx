@@ -1,9 +1,8 @@
 import React, { useCallback, useState } from 'react';
-import { requestAPI } from './handler';
-import { showErrorMessage, showDialog, Dialog } from '@jupyterlab/apputils';
 import { downloadIcon } from '@jupyterlab/ui-components';
 import { ContextMenuItem } from './ContextMenuItem';
 import { useBucketContext } from './BucketContext';
+import { downloadFile } from './utils';
 
 export const ContextMenu: React.FC<ContextMenu.IProps> = ({
   name,
@@ -21,25 +20,7 @@ export const ContextMenu: React.FC<ContextMenu.IProps> = ({
   );
 
   const download = useCallback(async () => {
-    try {
-      let filePath = name;
-      if (browser.breadcrumbs.length > 0) {
-        filePath = `${browser.breadcrumbs.join('/')}/${name}`;
-      }
-
-      const resp = await requestAPI<Private.IDownloadResponse>(
-        `download?file=${encodeURIComponent(filePath)}&bucket=${browser.bucket}`
-      );
-      await showDialog({
-        title: resp.success ? 'Success!' : 'Failed!',
-        body: `File ${name} was ${resp.success ? '' : 'not'} downloaded! \n ${
-          resp.message ? resp.message : ''
-        }`,
-        buttons: [Dialog.okButton({ label: 'OK' })]
-      });
-    } catch (err) {
-      await showErrorMessage('Something went wrong!', err);
-    }
+    await downloadFile(name, browser);
   }, [name]);
 
   return (
@@ -66,12 +47,5 @@ export const ContextMenu: React.FC<ContextMenu.IProps> = ({
 export namespace ContextMenu {
   export interface IProps {
     name: string;
-  }
-}
-
-namespace Private {
-  export interface IDownloadResponse {
-    success: boolean;
-    message: string;
   }
 }
