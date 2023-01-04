@@ -3,6 +3,9 @@
 
     https://jupyterlab.readthedocs.io/en/stable/developer/css.html
 */
+:root {
+  --bucket-download-color: #060;
+}
 
 /* --------- SPIN ANIMATION ---------- */
 @keyframes spin {
@@ -134,4 +137,46 @@
   border-radius: 50%;
   margin: 0 0.5em;
   animation: spin 0.5s infinite linear;
+}
+
+.align-flex-horizontal {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+@keyframes rain {
+  0% {
+    top: -1em;
+    opacity: 0;
+  }
+
+  50% {
+    opacity: 1;
+  }
+
+  100% {
+    top: 1em;
+    opacity: 0;
+  }
+}
+
+.bucket-DownloadAnimation {
+  display: inline-block;
+  z-index: 2;
+  position: relative;
+  height: 0.8em;
+  width: 1em;
+  margin-left: 0.5em;
+  margin-top: 0.2em;
+  overflow: hidden;
+  border-top: solid 1px var(--bucket-download-color);
+}
+
+.bucket-DownloadAnimation i {
+  color: var(--bucket-download-color);
+  position: absolute;
+  z-index: 1;
+  animation: linear 0.5s rain infinite;
 }

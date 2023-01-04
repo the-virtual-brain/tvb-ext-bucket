@@ -2,10 +2,15 @@ import { BucketFileBrowser } from './bucketFileBrowser';
 import { requestAPI } from './handler';
 import { Dialog, showDialog, showErrorMessage } from '@jupyterlab/apputils';
 
+/**
+ * utility function to download a file
+ * @param fileName - file to download
+ * @param browser - file browser which holds the breadcrumbs to the file
+ */
 export const downloadFile = async (
   fileName: string,
   browser: BucketFileBrowser
-) => {
+): Promise<void> => {
   try {
     let filePath = fileName;
     if (browser.breadcrumbs.length > 0) {
