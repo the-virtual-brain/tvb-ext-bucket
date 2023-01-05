@@ -1,11 +1,18 @@
 import { requestAPI } from './handler';
-import { BreadCrumbNotFoundError } from './exceptions';
+import {
+  BreadCrumbNotFoundError,
+  FileNameError,
+  FilePathMatchError
+} from './exceptions';
+import { isValidFileName } from './utils';
 
 export class BucketFileBrowser {
   private _bucket: string;
   private readonly _bucketEndpoint: string;
   private _breadcrumbs: Array<string> = [];
   private readonly _currentFiles: Map<string, BucketFileBrowser.IBucketEntry>;
+  private _homeDirectory?: BucketFileBrowser.BucketDirectory;
+  private _currentDirectory?: BucketFileBrowser.BucketDirectory;
 
   /**
    * create a new BucketFileBrowser instance which allows browsing in the bucket provided in options
@@ -15,6 +22,11 @@ export class BucketFileBrowser {
     this._bucket = options.bucket;
     this._bucketEndpoint = options.bucketEndPoint;
     this._currentFiles = new Map<string, BucketFileBrowser.IBucketEntry>();
+  }
+
+  private _buildBrowser(contents: Array<string>): void {
+    this._homeDirectory = new BucketFileBrowser.BucketDirectory('', contents);
+    this._currentDirectory = this._homeDirectory;
   }
 
   public get bucket(): string {
@@ -55,6 +67,8 @@ export class BucketFileBrowser {
       await requestAPI<BucketFileBrowser.IBucketStructureResponse>(
         `${this._bucketEndpoint}?bucket=${this._bucket}`
       );
+    this._buildBrowser(firstLevelFiles.files);
+    console.log('current dir: ', this._currentDirectory);
     return this._sortedFiles(firstLevelFiles.files);
   }
 
@@ -132,5 +146,101 @@ export namespace BucketFileBrowser {
   export interface IBucketStructureResponse {
     message: string;
     files: Array<string>;
+  }
+
+  export interface IBrowserEntry {
+    name: string;
+    absolutePath: string;
+    isFile: boolean;
+  }
+
+  export class BucketDirectory implements IBrowserEntry {
+    public readonly name: string;
+
+    public readonly absolutePath: string;
+
+    public readonly directories: Map<string, BucketDirectory> = new Map<
+      string,
+      BucketDirectory
+    >();
+
+    public readonly files: Map<string, BucketFile> = new Map<
+      string,
+      BucketFile
+    >();
+
+    public readonly isFile: boolean = false;
+
+    /**
+     * Create a new directory instance
+     * @param name
+     * @param contents
+     */
+    constructor(name: string, contents: Array<string>, absolutePath?: string) {
+      this.name = name;
+      this.absolutePath = absolutePath ? absolutePath : '';
+      this._buildContents(contents);
+    }
+
+    private _buildContents(contents: Array<string>): void {
+      for (const path of contents) {
+        if (!path.includes('/')) {
+          const fileEntry = new BucketFile(
+            path,
+            this.absolutePath + '/' + path
+          );
+
+          this.files.set(fileEntry.name, fileEntry);
+        } else {
+          const dirName = path.slice(0, path.indexOf('/'));
+          const subEntries = [path.slice(path.indexOf('/') + 1)];
+          const dirEntry = new BucketDirectory(
+            dirName,
+            subEntries,
+            this.absolutePath + '/' + dirName
+          );
+          this.directories.set(dirEntry.name, dirEntry);
+        }
+      }
+    }
+
+    public get filesCount(): number {
+      return this.files.size;
+    }
+
+    public get directoriesCount(): number {
+      return this.directories.size;
+    }
+  }
+
+  export class BucketFile implements IBrowserEntry {
+    public readonly name: string;
+
+    public readonly absolutePath: string;
+
+    public readonly isFile: boolean = true;
+
+    /**
+     * Create a BucketFile instance
+     * @param name - name of the file
+     * @param absolutePath - absolute path to this file
+     */
+    constructor(name: string, absolutePath: string) {
+      this.name = name;
+      this.absolutePath = absolutePath;
+      this._validate();
+    }
+
+    private _validate(): void {
+      if (!isValidFileName(this.name)) {
+        throw new FileNameError(`${this.name} is an invalid file name!`);
+      }
+
+      if (!this.absolutePath.endsWith(this.name)) {
+        throw new FilePathMatchError(
+          `Provided absolute path (${this.absolutePath}) does not lead to the provided file name (${this.name})!`
+        );
+      }
+    }
   }
 }

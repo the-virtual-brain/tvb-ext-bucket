@@ -75,6 +75,7 @@ class BucketWrapper:
         # type: (str, str) -> list[str]
         """
         Gets the list of files in a bucket space
+        !!! According to the API you can't have empty dirs in a bucket
         :param bucket_name: name of the bucket as string
         :param prefix: path-like string
         :return:
