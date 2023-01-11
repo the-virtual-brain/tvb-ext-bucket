@@ -12,3 +12,13 @@ export class FilePathMatchError extends Error {}
  * Error to be thrown when a file name is not valid
  */
 export class FileNameError extends Error {}
+
+/**
+ * Error to be thrown when a directory doesn't meet a criteria
+ */
+export class InvalidDirectoryError extends Error {}
+
+/**
+ * Error to be thrown when something is used out of context
+ */
+export class ContextError extends Error {}

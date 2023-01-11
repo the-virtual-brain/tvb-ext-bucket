@@ -1,7 +1,9 @@
 import {BucketSpace} from "../BucketWidget";
 import {cleanup, fireEvent, render, waitFor} from '@testing-library/react';
 import React from "react";
-import {BucketContextProvider} from "../BucketContext";
+import {BucketContextProvider, useBucketContext} from "../BucketContext";
+import {getError} from "./testUtils";
+import {ContextError} from "../exceptions";
 
 jest.mock('../handler', () => {
   return {
@@ -24,9 +26,21 @@ describe('Test BucketWidget.tsx', () => {
         const {getByText} = render(<BucketContextProvider><BucketSpace/></BucketContextProvider>)
         expect(getByText(/Connect!/i)).toBeTruthy();
         await waitFor(() => fireEvent.click(getByText(/Connect!/i)));
-        // fireEvent.click(getByText(/Connect!/i));
         expect(getByText(/file1.txt/i)).toBeTruthy();
         expect(getByText(/file2.txt/i)).toBeTruthy();
         expect(getByText(/dir1/i)).toBeTruthy();
     })
 })
+
+describe('Test BucketContext', () => {
+    it('throws error when out of context', async () => {
+        const WrongComponent = () => {
+            const bucket = useBucketContext();
+            return (
+                <div>{bucket.bucketName}</div>
+            )
+        }
+        const err = await getError(() => render(<WrongComponent/>));
+        expect(err).toBeInstanceOf(ContextError);
+    })
+});

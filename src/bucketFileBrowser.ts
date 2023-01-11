@@ -2,15 +2,17 @@ import { requestAPI } from './handler';
 import {
   BreadCrumbNotFoundError,
   FileNameError,
-  FilePathMatchError
+  FilePathMatchError,
+  InvalidDirectoryError
 } from './exceptions';
 import { isValidFileName } from './utils';
+import { Dialog, showDialog, showErrorMessage } from '@jupyterlab/apputils';
 
 export class BucketFileBrowser {
   private _bucket: string;
   private readonly _bucketEndpoint: string;
-  private _breadcrumbs: Array<string> = [];
-  private readonly _currentFiles: Map<string, BucketFileBrowser.IBucketEntry>;
+  private _breadcrumbs: Array<BucketFileBrowser.BucketDirectory> = [];
+  private readonly _currentFiles: Map<string, BucketFileBrowser.IBrowserEntry>;
   private _homeDirectory?: BucketFileBrowser.BucketDirectory;
   private _currentDirectory?: BucketFileBrowser.BucketDirectory;
 
@@ -21,12 +23,23 @@ export class BucketFileBrowser {
   constructor(options: BucketFileBrowser.IOptions) {
     this._bucket = options.bucket;
     this._bucketEndpoint = options.bucketEndPoint;
-    this._currentFiles = new Map<string, BucketFileBrowser.IBucketEntry>();
+    this._currentFiles = new Map<string, BucketFileBrowser.IBrowserEntry>();
   }
 
   private _buildBrowser(contents: Array<string>): void {
-    this._homeDirectory = new BucketFileBrowser.BucketDirectory('', contents);
+    this._homeDirectory = new BucketFileBrowser.BucketDirectory(
+      '',
+      contents,
+      this.bucket
+    );
     this._currentDirectory = this._homeDirectory;
+  }
+
+  /**
+   * getter function for the _currentDirectory
+   */
+  public get currentDirectory(): BucketFileBrowser.BucketDirectory | undefined {
+    return this._currentDirectory;
   }
 
   public get bucket(): string {
@@ -38,28 +51,26 @@ export class BucketFileBrowser {
   }
 
   /**
+   * Get a list of all contents of current directory
+   */
+  ls(): Array<BucketFileBrowser.IBrowserEntry> {
+    if (!this.currentDirectory) {
+      return [];
+    }
+    return this.currentDirectory.ls();
+  }
+
+  /**
    * get current file browser path
    */
-  get breadcrumbs(): Array<string> {
+  get breadcrumbs(): Array<BucketFileBrowser.BucketDirectory> {
     return this._breadcrumbs;
   }
 
   /**
-   * get current files sorted
+   * method to get the file structure of the bucket and build the browser for it
    */
-  private _sortedFiles(
-    files: Array<string>
-  ): Array<BucketFileBrowser.IBucketEntry> {
-    this._buildEntries(files);
-    const entriesList = Array.from(this._currentFiles.values());
-    entriesList.sort((a, b) => (!a.isFile && b.isFile ? -1 : 1));
-    return entriesList;
-  }
-
-  /**
-   * method to get the first level of folders and files in the bucket
-   */
-  async openBucket(): Promise<Array<BucketFileBrowser.IBucketEntry>> {
+  async openBucket(): Promise<BucketFileBrowser.BucketDirectory | undefined> {
     // make sure the current file set is empty before populating
     this._currentFiles.clear();
     this._breadcrumbs = []; // current path is '/'
@@ -68,67 +79,54 @@ export class BucketFileBrowser {
         `${this._bucketEndpoint}?bucket=${this._bucket}`
       );
     this._buildBrowser(firstLevelFiles.files);
-    console.log('current dir: ', this._currentDirectory);
-    return this._sortedFiles(firstLevelFiles.files);
+
+    return this.currentDirectory;
   }
 
   /**
-   * method to get next level of files/directories from a directory
+   * method to access a directory child to current directory
    */
-  async cd(directory: string): Promise<Array<BucketFileBrowser.IBucketEntry>> {
-    this._currentFiles.clear();
-    this._breadcrumbs.push(`${directory}`);
-    const prefix = this.breadcrumbs.reduce((acc, curr) => acc + curr + '/', '');
-    console.log('Going to files in: ', prefix);
-    const contents =
-      await requestAPI<BucketFileBrowser.IBucketStructureResponse>(
-        `${this._bucketEndpoint}?bucket=${this._bucket}&prefix=${prefix}`
+  async cd(directoryName: string): Promise<BucketFileBrowser.BucketDirectory> {
+    const dirToCd = this._currentDirectory?.directories.get(directoryName);
+    if (!dirToCd) {
+      throw new InvalidDirectoryError(
+        `Can't cd to directory ${directoryName}! Directory doesn't seem to exist.`
       );
-    return this._sortedFiles(contents.files);
+    }
+    this._currentDirectory = dirToCd;
+    this._currentFiles.clear();
+    this._breadcrumbs.push(dirToCd);
+    const prefix = this.breadcrumbs.reduce(
+      (acc, curr) => acc + curr.name + '/',
+      ''
+    );
+    console.log('Going to files in: ', prefix);
+
+    return dirToCd;
   }
 
   /**
    * opens a directory from breadcrumbs
    * @param directory
    */
-  async goTo(
-    directory: string
-  ): Promise<Array<BucketFileBrowser.IBucketEntry>> {
-    if (!this._breadcrumbs.includes(directory)) {
+  async goTo(directory: string): Promise<BucketFileBrowser.BucketDirectory> {
+    const breadcrumbsCopy = [...this._breadcrumbs];
+    let currentBreadcrumb = breadcrumbsCopy.pop();
+    while (
+      currentBreadcrumb !== undefined &&
+      currentBreadcrumb.name !== directory
+    ) {
+      currentBreadcrumb = breadcrumbsCopy.pop();
+    }
+    if (currentBreadcrumb === undefined) {
       throw new BreadCrumbNotFoundError(
         `Could not find breadcrumb ${directory}`
       );
     }
-
-    this._breadcrumbs = this._breadcrumbs.slice(
-      0,
-      this._breadcrumbs.indexOf(directory)
-    );
-
-    return this.cd(directory);
-  }
-
-  /**
-   * method to build a list of IBucketEntry from a list of file paths
-   * @param filesList
-   * @private
-   */
-  private _buildEntries(filesList: Array<string>): void {
-    for (const path of filesList) {
-      let entry;
-      if (path.includes('/')) {
-        entry = {
-          name: path.substring(0, path.indexOf('/')),
-          isFile: false
-        };
-      } else {
-        entry = {
-          name: path,
-          isFile: true
-        };
-      }
-      this._currentFiles.set(entry.name, entry);
-    }
+    breadcrumbsCopy.push(currentBreadcrumb);
+    this._breadcrumbs = breadcrumbsCopy;
+    this._currentDirectory = currentBreadcrumb;
+    return currentBreadcrumb;
   }
 }
 
@@ -136,11 +134,6 @@ export namespace BucketFileBrowser {
   export interface IOptions {
     bucketEndPoint: string;
     bucket: string;
-  }
-
-  export interface IBucketEntry {
-    name: string;
-    isFile: boolean;
   }
 
   export interface IBucketStructureResponse {
@@ -154,9 +147,14 @@ export namespace BucketFileBrowser {
     isFile: boolean;
   }
 
+  export interface IDownloadResponse {
+    success: boolean;
+    message: string;
+  }
+
   export class BucketDirectory implements IBrowserEntry {
     public readonly name: string;
-
+    public readonly bucket: string;
     public readonly absolutePath: string;
 
     public readonly directories: Map<string, BucketDirectory> = new Map<
@@ -173,35 +171,59 @@ export namespace BucketFileBrowser {
 
     /**
      * Create a new directory instance
-     * @param name
-     * @param contents
+     * @param name - name of directory
+     * @param contents - array of pathlike strings
+     * @param bucket - bucket name as string
+     * @param absolutePath - pathlike string representing the absolute path of the directory in bucket
      */
-    constructor(name: string, contents: Array<string>, absolutePath?: string) {
+    constructor(
+      name: string,
+      contents: Array<string>,
+      bucket: string,
+      absolutePath?: string
+    ) {
       this.name = name;
+      this.bucket = bucket;
       this.absolutePath = absolutePath ? absolutePath : '';
       this._buildContents(contents);
     }
 
     private _buildContents(contents: Array<string>): void {
+      const subdirs = new Map<string, Array<string>>();
+      // instantiate files in this directory while creating the list with subdirectories
       for (const path of contents) {
         if (!path.includes('/')) {
           const fileEntry = new BucketFile(
             path,
-            this.absolutePath + '/' + path
+            this.absolutePath ? `${this.absolutePath}/${path}` : path,
+            this.bucket
           );
 
           this.files.set(fileEntry.name, fileEntry);
         } else {
           const dirName = path.slice(0, path.indexOf('/'));
-          const subEntries = [path.slice(path.indexOf('/') + 1)];
-          const dirEntry = new BucketDirectory(
-            dirName,
-            subEntries,
-            this.absolutePath + '/' + dirName
-          );
-          this.directories.set(dirEntry.name, dirEntry);
+          const subEntry = path.slice(path.indexOf('/') + 1);
+          const subdirContents = subdirs.get(dirName);
+          if (subdirContents) {
+            subdirContents.push(subEntry);
+          } else {
+            subdirs.set(dirName, [subEntry]);
+          }
         }
       }
+      // build sub-directories
+      subdirs.forEach((value, key) => {
+        const absolutePath = this.absolutePath
+          ? `${this.absolutePath}/${key}`
+          : key;
+        const subDir = new BucketDirectory(
+          key,
+          value,
+          this.bucket,
+          absolutePath
+        );
+        this.directories.set(key, subDir);
+      });
     }
 
     public get filesCount(): number {
@@ -211,11 +233,28 @@ export namespace BucketFileBrowser {
     public get directoriesCount(): number {
       return this.directories.size;
     }
+
+    /**
+     * Get a list of all contents of current directory
+     */
+    ls(): Array<BucketFileBrowser.IBrowserEntry> {
+      const contents: Array<BucketFileBrowser.IBrowserEntry> = [];
+
+      for (const dir of this.directories.values()) {
+        contents.push(dir);
+      }
+
+      for (const fileEntry of this.files.values()) {
+        contents.push(fileEntry);
+      }
+
+      return contents;
+    }
   }
 
   export class BucketFile implements IBrowserEntry {
     public readonly name: string;
-
+    public readonly bucket: string;
     public readonly absolutePath: string;
 
     public readonly isFile: boolean = true;
@@ -225,10 +264,33 @@ export namespace BucketFileBrowser {
      * @param name - name of the file
      * @param absolutePath - absolute path to this file
      */
-    constructor(name: string, absolutePath: string) {
+    constructor(name: string, absolutePath: string, bucket: string) {
       this.name = name;
+      this.bucket = bucket;
       this.absolutePath = absolutePath;
       this._validate();
+    }
+
+    /**
+     * Calls the endpoint to download this file from bucket to current path in jp file browser
+     */
+    public async download(): Promise<void> {
+      try {
+        const filePath = this.absolutePath;
+
+        const resp = await requestAPI<IDownloadResponse>(
+          `download?file=${encodeURIComponent(filePath)}&bucket=${this.bucket}`
+        );
+        await showDialog({
+          title: resp.success ? 'Success!' : 'Failed!',
+          body: `File ${this.name} was ${
+            resp.success ? '' : 'not'
+          } downloaded! \n ${resp.message ? resp.message : ''}`,
+          buttons: [Dialog.okButton({ label: 'OK' })]
+        });
+      } catch (err) {
+        await showErrorMessage('Something went wrong!', err);
+      }
     }
 
     private _validate(): void {

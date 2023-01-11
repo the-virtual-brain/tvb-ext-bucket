@@ -1,9 +1,8 @@
 import React, { createContext, useState, useContext } from 'react';
 import { BucketFileBrowser } from './bucketFileBrowser';
+import { ContextError } from './exceptions';
 
-const BucketContext = createContext<BucketContext.IContext | undefined>(
-  undefined
-);
+const BucketContext = createContext<IContext | undefined>(undefined);
 
 export const BucketContextProvider: React.FC = ({ children }) => {
   const [bucketName, setBucketName] = useState<string>('');
@@ -27,7 +26,7 @@ export const BucketContextProvider: React.FC = ({ children }) => {
 export const useBucketContext = () => {
   const ctx = useContext(BucketContext);
   if (ctx === undefined) {
-    throw new Error(
+    throw new ContextError(
       'useBucketContext must be used within a BucketContextProvider'
     );
   }
@@ -35,10 +34,8 @@ export const useBucketContext = () => {
   return ctx;
 };
 
-export namespace BucketContext {
-  export interface IContext {
-    fileBrowser: BucketFileBrowser;
-    bucketName: string;
-    setBucketName: React.Dispatch<React.SetStateAction<string>>;
-  }
+export interface IContext {
+  fileBrowser: BucketFileBrowser;
+  bucketName: string;
+  setBucketName: React.Dispatch<React.SetStateAction<string>>;
 }

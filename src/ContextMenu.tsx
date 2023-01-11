@@ -2,9 +2,9 @@ import React, { useCallback, useState } from 'react';
 import { downloadIcon } from '@jupyterlab/ui-components';
 import { ContextMenuItem } from './ContextMenuItem';
 import { useBucketContext } from './BucketContext';
-import { downloadFile } from './utils';
+import { showErrorMessage } from '@jupyterlab/apputils';
 
-export const ContextMenu: React.FC<ContextMenu.IProps> = ({
+export const ContextMenu: React.FC<ContextMenuNamespace.IProps> = ({
   name,
   children
 }): JSX.Element => {
@@ -20,7 +20,15 @@ export const ContextMenu: React.FC<ContextMenu.IProps> = ({
   );
 
   const download = useCallback(async () => {
-    await downloadFile(name, browser);
+    const file = browser.currentDirectory?.files.get(name);
+    if (file) {
+      await file.download();
+    } else {
+      await showErrorMessage(
+        'Download failed!',
+        `Can't find file ${name} in directory ${browser.currentDirectory?.name}`
+      );
+    }
   }, [name]);
 
   return (
@@ -44,7 +52,7 @@ export const ContextMenu: React.FC<ContextMenu.IProps> = ({
   );
 };
 
-export namespace ContextMenu {
+export namespace ContextMenuNamespace {
   export interface IProps {
     name: string;
   }

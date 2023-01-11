@@ -1,14 +1,11 @@
 import React, { useCallback, useState } from 'react';
-import { downloadFile } from './utils';
-import { useBucketContext } from './BucketContext';
+import { BucketFileBrowser } from './bucketFileBrowser';
 
-export const DragDownload: React.FC<DragDownload.IProps> = ({
+export const DragDownload: React.FC<DragDownloadNamespace.IProps> = ({
   children,
-  name
+  file
 }) => {
   const [downloading, setDownloading] = useState<boolean>(false);
-
-  const browser = useBucketContext().fileBrowser;
 
   /**
    * callback to check if the drag end event is triggered in the area
@@ -23,7 +20,7 @@ export const DragDownload: React.FC<DragDownload.IProps> = ({
     ev.stopPropagation();
     if (isInJpBrowserDropZone(ev)) {
       setDownloading(true);
-      await downloadFile(name, browser);
+      await file.download();
       setDownloading(false);
     }
   }, []);
@@ -44,8 +41,10 @@ export const DragDownload: React.FC<DragDownload.IProps> = ({
   );
 };
 
-export namespace DragDownload {
+export namespace DragDownloadNamespace {
+  import BucketFile = BucketFileBrowser.BucketFile;
+
   export interface IProps {
-    name: string;
+    file: BucketFile;
   }
 }
