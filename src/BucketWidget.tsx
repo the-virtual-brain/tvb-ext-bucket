@@ -44,6 +44,7 @@ export const BucketSpace = (): JSX.Element => {
         <input
           type={'text'}
           value={bucketName}
+          aria-label={'bucket-name-input'}
           onChange={ev => setBucketName(ev.target.value)}
         />
         <button onClick={getBucket}>Connect!</button>
@@ -56,6 +57,7 @@ export const BucketSpace = (): JSX.Element => {
             <span
               key={index}
               className={'bucket-BreadCrumbs-Item'}
+              aria-label={`breadcrumb-${index}`}
               onClick={withSpinnerDecorator(async () => {
                 const currentDir = await bucketBrowser.goTo(
                   bucketBrowser.breadcrumbs[index].name
