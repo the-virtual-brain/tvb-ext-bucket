@@ -5,11 +5,15 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
+import { FileBrowser, IFileBrowserFactory } from '@jupyterlab/filebrowser';
+
 import { ICommandPalette, WidgetTracker } from '@jupyterlab/apputils';
 
 import { IConsoleTracker } from '@jupyterlab/console';
 
 import { BucketWidget } from './BucketWidget';
+
+import { JpFileBrowser } from './JpFileBrowser';
 
 /**
  * Initialization data for the tvb-ext-bucket extension.
@@ -17,15 +21,26 @@ import { BucketWidget } from './BucketWidget';
 const plugin: JupyterFrontEndPlugin<void> = {
   id: 'tvb-ext-bucket:plugin',
   autoStart: true,
-  requires: [ICommandPalette, ILayoutRestorer, IConsoleTracker, ILabShell],
+  requires: [
+    ICommandPalette,
+    ILayoutRestorer,
+    IConsoleTracker,
+    ILabShell,
+    IFileBrowserFactory
+  ],
   activate: (
     app: JupyterFrontEnd,
     palette: ICommandPalette,
     restorer: ILayoutRestorer,
     consoleTracker: IConsoleTracker,
-    labShell: ILabShell
+    labShell: ILabShell,
+    fileBrowserFactory: IFileBrowserFactory
   ) => {
     console.log('JupyterLab extension tvb-ext-bucket is activated!');
+
+    // set up the default file browser
+    const browser: FileBrowser = fileBrowserFactory.defaultBrowser;
+    JpFileBrowser.current = browser;
 
     const id = 'tvb-ext-bucket';
     const sidebar = new BucketWidget();
