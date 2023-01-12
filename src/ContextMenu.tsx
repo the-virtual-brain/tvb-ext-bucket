@@ -38,7 +38,7 @@ export const ContextMenu: React.FC<ContextMenuNamespace.IProps> = ({
     >
       {children}
       {show && (
-        <div className={'bucket-ContextMenu'}>
+        <div className={'bucket-ContextMenu'} aria-label={'context-menu'}>
           <ul>
             <ContextMenuItem
               label={'Download'}
