@@ -30,10 +30,8 @@ class BucketsHandler(APIHandler):
         try:
             bucket_name = self.get_argument('bucket')
             LOGGER.info(f'OPEN bucket {json.dumps(bucket_name)}')
-            prefix = self.get_argument('prefix', '')
-            LOGGER.info(f'SEARCH in {json.dumps(prefix)}')
             bucket_wrapper = BucketWrapper()
-            response['files'] = bucket_wrapper.get_files_in_bucket(bucket_name, prefix=prefix)
+            response['files'] = bucket_wrapper.get_files_in_bucket(bucket_name)
         except MissingArgumentError:
             response['message'] = 'No collab name provided!'
         except TokenExpired as e:

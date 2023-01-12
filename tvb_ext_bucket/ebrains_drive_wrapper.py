@@ -6,6 +6,7 @@
 #
 
 from ebrains_drive import BucketApiClient
+from ebrains_drive.bucket import Bucket
 
 from ebrains_drive.exceptions import Unauthorized
 
@@ -19,26 +20,13 @@ LOGGER = get_logger(__name__)
 TOKEN_ENV_VAR = 'CLB_AUTH'
 
 
-def clear_prefix(text, prefix):
-    # type: (str, str) -> str
-    """
-    function to remove prefix from a string
-    Parameters
-    ----------
-    text: string to have prefix removed
-    prefix: string to be removed at the start of text
-
-    Returns
-    -------
-    text without prefix as string
-    """
-    text_new = text
-    if text.startswith(prefix):
-        text_new = text[len(prefix):]
-    return text_new
-
-
 def get_collab_token():
+    # type: () -> str
+    """
+    Try to get the collab authentication token of the current user
+    -----
+    :return: token
+    """
     try:
         from clb_nb_utils import oauth as clb_oauth
         token = clb_oauth.get_token()
@@ -62,6 +50,12 @@ class BucketWrapper:
         self.client = self.get_client()
 
     def _get_bucket(self, bucket_name):
+        # type: (str) -> Bucket
+        """
+        Gets a Bucket instance for the specified name if current user has access to it
+        :param bucket_name: name of the bucket as string
+        :return: Bucket instance for the provided name
+        """
         LOGGER.info(f'Getting bucket {bucket_name}')
         try:
             bucket = self.client.buckets.get_bucket(bucket_name)
@@ -71,18 +65,17 @@ class BucketWrapper:
             raise CollabAccessError(e)
         return bucket
 
-    def get_files_in_bucket(self, bucket_name, prefix=''):
-        # type: (str, str) -> list[str]
+    def get_files_in_bucket(self, bucket_name):
+        # type: (str) -> list[str]
         """
         Gets the list of files in a bucket space
         !!! According to the API you can't have empty dirs in a bucket
         :param bucket_name: name of the bucket as string
-        :param prefix: path-like string
         :return:
         """
         bucket = self._get_bucket(bucket_name)
         # remove the prefix from the list of files
-        files_list = [clear_prefix(f.name, prefix) for f in bucket.ls(prefix=prefix)]
+        files_list = [f.name for f in bucket.ls()]
         return files_list
 
     def get_client(self):
@@ -105,6 +98,20 @@ class BucketWrapper:
         return BucketApiClient(token=token)
 
     def download_file(self, file_path, bucket_name, location):
+        # type: (str, str, str) -> bool
+        """
+        download a file with absolute path as <file_path> from bucket with name <bucket_name>
+        to location <location>
+        Parameters
+        ----------
+        file_path
+        bucket_name
+        location
+
+        Returns
+        -------
+
+        """
         LOGGER.info(f'DOWNLOADING: attempt to download {file_path} from bucket {bucket_name} to location {location}')
         bucket = self._get_bucket(bucket_name)
         # find first dataproxy file corresponding to provided path

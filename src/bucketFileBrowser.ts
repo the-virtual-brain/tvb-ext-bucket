@@ -75,11 +75,11 @@ export class BucketFileBrowser {
     // make sure the current file set is empty before populating
     this._currentFiles.clear();
     this._breadcrumbs = []; // current path is '/'
-    const firstLevelFiles =
+    const bucketStructureResponse =
       await requestAPI<BucketFileBrowser.IBucketStructureResponse>(
         `${this._bucketEndpoint}?bucket=${this._bucket}`
       );
-    this._buildBrowser(firstLevelFiles.files);
+    this._buildBrowser(bucketStructureResponse.files);
 
     return this.currentDirectory;
   }
@@ -264,6 +264,7 @@ export namespace BucketFileBrowser {
      * Create a BucketFile instance
      * @param name - name of the file
      * @param absolutePath - absolute path to this file
+     * @param bucket - bucket name as string
      */
     constructor(name: string, absolutePath: string, bucket: string) {
       this.name = name;
