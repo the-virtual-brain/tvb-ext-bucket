@@ -7,6 +7,7 @@ import {
 } from './exceptions';
 import { isValidFileName } from './utils';
 import { Dialog, showDialog, showErrorMessage } from '@jupyterlab/apputils';
+import { JpFileBrowser } from './JpFileBrowser';
 
 export class BucketFileBrowser {
   private _bucket: string;
@@ -278,8 +279,19 @@ export namespace BucketFileBrowser {
       try {
         const filePath = this.absolutePath;
 
+        let downloadDestination = JpFileBrowser.current?.model.path;
+        if (!downloadDestination) {
+          downloadDestination = '';
+        }
+
+        console.log('downloading to: ', downloadDestination);
+
         const resp = await requestAPI<IDownloadResponse>(
-          `download?file=${encodeURIComponent(filePath)}&bucket=${this.bucket}`
+          `download?file=${encodeURIComponent(
+            filePath
+          )}&download_destination=${encodeURIComponent(
+            downloadDestination
+          )}&bucket=${this.bucket}`
         );
         await showDialog({
           title: resp.success ? 'Success!' : 'Failed!',

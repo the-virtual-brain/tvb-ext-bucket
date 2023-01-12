@@ -86,6 +86,13 @@ class BucketWrapper:
         return files_list
 
     def get_client(self):
+        # type: () -> BucketApiClient
+        """
+        Get an instance of the BucketApiClient
+        Returns
+        -------
+
+        """
         try:
             token = get_collab_token()
         except Exception as e:
@@ -97,8 +104,8 @@ class BucketWrapper:
             raise CollabTokenError('Failed to connect to EBRAINS! Could not find token!')
         return BucketApiClient(token=token)
 
-    def download_file(self, file_path, bucket_name):
-        LOGGER.info(f'DOWNLOADING: attempt to download {file_path} from bucket {bucket_name}')
+    def download_file(self, file_path, bucket_name, location):
+        LOGGER.info(f'DOWNLOADING: attempt to download {file_path} from bucket {bucket_name} to location {location}')
         bucket = self._get_bucket(bucket_name)
         # find first dataproxy file corresponding to provided path
         dataproxy_file = next((f for f in bucket.ls() if f.name == file_path), None)
@@ -106,7 +113,8 @@ class BucketWrapper:
         if dataproxy_file is None:
             return False
         file_name = file_path.split('/')[-1]
-        with open(file_name, 'xb') as f:
+        target_file = os.path.join(location, file_name)
+        with open(target_file, 'xb') as f:
             content = dataproxy_file.get_content()
             f.write(content)
         return True

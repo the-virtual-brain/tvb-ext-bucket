@@ -54,15 +54,16 @@ class DownloadHandler(APIHandler):
         try:
             file_path = self.get_argument('file')
             bucket = self.get_argument('bucket')
+            download_destination = self.get_argument('download_destination')
             bucket_wrapper = BucketWrapper()
-            resp = bucket_wrapper.download_file(file_path, bucket)
+            resp = bucket_wrapper.download_file(file_path, bucket, download_destination)
             response['success'] = resp
             response['message'] = f'File {file_path} was downloaded from bucket {bucket}'
             self.finish(response)
         except MissingArgumentError as e:
             response['message'] = e.log_message
             self.finish(response)
-        except FileExistsError as e:
+        except FileExistsError:
             response['message'] = f'File {file_path.split("/")[-1]} already exists! Please move or ' \
                                   f'rename the existing file and try again!'
             self.finish(response)
