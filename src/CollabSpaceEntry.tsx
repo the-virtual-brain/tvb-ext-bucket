@@ -3,6 +3,7 @@ import { BucketFileBrowser } from './bucketFileBrowser';
 import { ContextMenu } from './ContextMenu';
 import { fileIcon, folderIcon } from '@jupyterlab/ui-components';
 import { DragDownload } from './DragDownload';
+import BucketFile = BucketFileBrowser.BucketFile;
 
 export function CollabSpaceEntry({
   tag,
@@ -27,7 +28,7 @@ export function CollabSpaceEntry({
       {/* Add context menu only to files */}
       {metadata.isFile ? (
         <ContextMenu name={metadata.name}>
-          <DragDownload name={metadata.name}>
+          <DragDownload file={metadata as BucketFile}>
             <p onClick={onClick} style={{ cursor: 'pointer' }}>
               {metadata.name}
             </p>
@@ -45,7 +46,7 @@ export function CollabSpaceEntry({
 export namespace CollabSpaceEntry {
   export interface IProps {
     tag: 'li' | 'div';
-    metadata: BucketFileBrowser.IBucketEntry;
+    metadata: BucketFileBrowser.IBrowserEntry;
     onClick?: () => void;
   }
 }
