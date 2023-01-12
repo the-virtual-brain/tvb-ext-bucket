@@ -23,7 +23,7 @@ export const BucketContextProvider: React.FC = ({ children }) => {
 /**
  * helper function to consume the context
  */
-export const useBucketContext = () => {
+export const useBucketContext = (): IContext => {
   const ctx = useContext(BucketContext);
   if (ctx === undefined) {
     throw new ContextError(
