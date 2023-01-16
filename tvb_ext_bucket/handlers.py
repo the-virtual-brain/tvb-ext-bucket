@@ -67,6 +67,33 @@ class DownloadHandler(APIHandler):
             self.finish(response)
 
 
+class UploadHandler(APIHandler):
+    @tornado.web.authenticated
+    def get(self):
+        response = {
+            'success': False,
+            'message': ''
+        }
+        try:
+            source_file = self.get_argument('source_file')
+            bucket = self.get_argument('bucket')
+            destination = self.get_argument('destination')
+            filename = self.get_argument('filename')
+            bucket_wrapper = BucketWrapper()
+            resp = bucket_wrapper.upload_file_to(source_file, bucket, destination, filename)
+            if not resp:
+                response['message'] = f'Could not upload file {source_file} to bucket {bucket} at {destination}'
+            else:
+                response = {
+                    'success': True,
+                    'message': 'Upload success!'
+                }
+            self.finish(response)
+        except MissingArgumentError as e:
+            response['message'] = e.log_message
+            self.finish(response)
+
+
 def setup_handlers(web_app):
     host_pattern = ".*$"
 

@@ -125,3 +125,28 @@ class BucketWrapper:
             content = dataproxy_file.get_content()
             f.write(content)
         return True
+
+    def upload_file_to(self, source_file, bucket, destination, filename):
+        # type: (str, str, str, str) -> bool
+        """
+        Uploads the file <source_file> to bucket <bucket> in directory <destination> with name <filename>
+        ----------
+        :source_file: path to the file to upload
+        :bucket: name of the bucket in which to upload
+        :destination: path to the directory in the bucket to upload in
+        :filename: name of the file after upload
+        -------
+        :return: True if file uploaded successfully, False otherwise
+        """
+        if not os.path.exists(source_file):
+            raise FileNotFoundError(f'Could not find source file {source_file} on disk!')
+        to = destination.strip(' ').lstrip('/')
+        to = os.path.join(to, filename)
+        bucket = self._get_bucket(bucket)
+        with open(source_file, 'rb') as source:
+            content = source.read()
+            try:
+                bucket.upload(content, to)
+            except RuntimeError:
+                return False
+        return True
