@@ -140,13 +140,11 @@ class BucketWrapper:
         """
         if not os.path.exists(source_file):
             raise FileNotFoundError(f'Could not find source file {source_file} on disk!')
-        to = destination.strip(' ').lstrip('/')
-        to = os.path.join(to, filename)
+        to = destination.strip(' ').strip('/')
+        to = f'{to}/{filename}'
         bucket = self._get_bucket(bucket)
-        with open(source_file, 'rb') as source:
-            content = source.read()
-            try:
-                bucket.upload(content, to)
-            except RuntimeError:
-                return False
+        try:
+            bucket.upload(source_file, to)
+        except RuntimeError:
+            return False
         return True

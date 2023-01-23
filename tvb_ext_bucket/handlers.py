@@ -100,8 +100,11 @@ def setup_handlers(web_app):
     base_url = web_app.settings["base_url"]
     bucket_pattern = url_path_join(base_url, "tvb_ext_bucket", "buckets")
     download_pattern = url_path_join(base_url, "tvb_ext_bucket", "download")
+    upload_pattern = url_path_join(base_url, "tvb_ext_bucket", "upload")
+
     handlers = [
         (bucket_pattern, BucketsHandler),
-        (download_pattern, DownloadHandler)
+        (download_pattern, DownloadHandler),
+        (upload_pattern, UploadHandler)
     ]
     web_app.add_handlers(host_pattern, handlers)

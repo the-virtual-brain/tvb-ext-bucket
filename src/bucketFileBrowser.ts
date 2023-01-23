@@ -1,11 +1,9 @@
 import { requestAPI } from './handler';
 import {
   BreadCrumbNotFoundError,
-  FileNameError,
   FilePathMatchError,
   InvalidDirectoryError
 } from './exceptions';
-import { isValidFileName } from './utils';
 import { Dialog, showDialog, showErrorMessage } from '@jupyterlab/apputils';
 import { JpFileBrowser } from './JpFileBrowser';
 
@@ -251,6 +249,12 @@ export namespace BucketFileBrowser {
 
       return contents;
     }
+    async upload(fileSource: string, filename: string): Promise<void> {
+      const result = requestAPI(
+        `upload?source_file=${fileSource}&bucket=${this.bucket}&destination=${this.absolutePath}&filename=${filename}`
+      );
+      console.log('result: ', result);
+    }
   }
 
   export class BucketFile implements IBrowserEntry {
@@ -307,10 +311,6 @@ export namespace BucketFileBrowser {
     }
 
     private _validate(): void {
-      if (!isValidFileName(this.name)) {
-        throw new FileNameError(`${this.name} is an invalid file name!`);
-      }
-
       if (!this.absolutePath.endsWith(this.name)) {
         throw new FilePathMatchError(
           `Provided absolute path (${this.absolutePath}) does not lead to the provided file name (${this.name})!`

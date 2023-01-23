@@ -4,6 +4,7 @@ import { BucketFileBrowser } from './bucketFileBrowser';
 import { CollabSpaceEntry } from './CollabSpaceEntry';
 import { folderIcon } from '@jupyterlab/ui-components';
 import { JpSpinner } from './JpSpinner';
+import { DropZone } from './DropZone';
 import { BucketContextProvider, useBucketContext } from './BucketContext';
 
 export const BucketSpace = (): JSX.Element => {
@@ -11,6 +12,7 @@ export const BucketSpace = (): JSX.Element => {
     useState<BucketFileBrowser.BucketDirectory | null>(null);
   const [bucketName, setBucketName] = useState<string>('');
   const [showSpinner, setShowSpinner] = useState<boolean>(false);
+
   const bucketBrowser = useBucketContext().fileBrowser;
 
   /**
@@ -71,31 +73,29 @@ export const BucketSpace = (): JSX.Element => {
         })}
       </div>
 
-      {showSpinner ? (
-        <JpSpinner />
-      ) : (
-        <ul>
-          {currentDir?.ls().map((bucketEntry): ReactElement => {
-            let onClick = () => {
-              return;
-            };
-            if (!bucketEntry.isFile) {
-              onClick = withSpinnerDecorator(async () => {
-                const currentDir = await bucketBrowser.cd(bucketEntry.name);
-                setCurrentDir(currentDir);
-              });
-            }
-            return (
-              <CollabSpaceEntry
-                tag={'li'}
-                metadata={bucketEntry}
-                key={bucketEntry.name}
-                onClick={onClick}
-              />
-            );
-          })}
-        </ul>
-      )}
+      <JpSpinner show={showSpinner} />
+      <ul style={{ display: showSpinner ? 'none' : 'block' }}>
+        {currentDir?.ls().map((bucketEntry): ReactElement => {
+          let onClick = () => {
+            return;
+          };
+          if (!bucketEntry.isFile) {
+            onClick = withSpinnerDecorator(async () => {
+              const currentDir = await bucketBrowser.cd(bucketEntry.name);
+              setCurrentDir(currentDir);
+            });
+          }
+          return (
+            <CollabSpaceEntry
+              tag={'li'}
+              metadata={bucketEntry}
+              key={bucketEntry.name}
+              onClick={onClick}
+            />
+          );
+        })}
+      </ul>
+      <DropZone />
     </>
   );
 };

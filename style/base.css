@@ -5,6 +5,7 @@
 */
 :root {
   --bucket-download-color: #060;
+  --bucket-text-info-color: #d3d3d3;
 }
 
 /* --------- SPIN ANIMATION ---------- */
@@ -179,4 +180,26 @@
   position: absolute;
   z-index: 1;
   animation: linear 0.5s rain infinite;
+}
+
+.bucket-DropZone {
+  margin: 0 auto;
+  padding: 0.5em;
+  width: 90%;
+  height: 4em;
+  border: dashed 2px var(--bucket-text-info-color);
+  border-radius: 7px;
+}
+
+.default {
+  border-color: var(--bucket-text-info-color);
+}
+
+.hover {
+  border-color: black;
+}
+
+.bucket-text-info {
+  color: var(--bucket-text-info-color);
+  font-style: italic;
 }
