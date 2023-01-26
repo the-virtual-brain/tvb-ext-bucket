@@ -94,6 +94,36 @@ class UploadHandler(APIHandler):
             self.finish(response)
 
 
+class LocalUploadHandler(APIHandler):
+    """
+    Handler for uploading a file from local storage
+    """
+    @tornado.web.authenticated
+    def get(self):
+        """
+        get route of the handler. Returns a url to send data to with a "PUT" request
+        Returns
+        -------
+
+        """
+        # get data from request
+        response = {
+            'success': False,
+            'url': ''
+        }
+        try:
+            to_bucket = self.get_argument('to_bucket')
+            with_name = self.get_argument('with_name')
+            to_path = self.get_argument('to_path')
+            wrapper = BucketWrapper()
+            url = wrapper.upload_bytes(to_bucket, with_name, to_path)
+            response['success'] = True
+            response['url'] = url
+        except MissingArgumentError as e:
+            response['message'] = e.log_message
+        self.finish(response)
+
+
 def setup_handlers(web_app):
     host_pattern = ".*$"
 
@@ -101,10 +131,12 @@ def setup_handlers(web_app):
     bucket_pattern = url_path_join(base_url, "tvb_ext_bucket", "buckets")
     download_pattern = url_path_join(base_url, "tvb_ext_bucket", "download")
     upload_pattern = url_path_join(base_url, "tvb_ext_bucket", "upload")
+    local_upload_pattern = url_path_join(base_url, "tvb_ext_bucket", "local_upload")
 
     handlers = [
         (bucket_pattern, BucketsHandler),
         (download_pattern, DownloadHandler),
-        (upload_pattern, UploadHandler)
+        (upload_pattern, UploadHandler),
+        (local_upload_pattern, LocalUploadHandler)
     ]
     web_app.add_handlers(host_pattern, handlers)

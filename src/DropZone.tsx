@@ -10,7 +10,10 @@ import { useBucketContext } from './BucketContext';
 import { JpFileBrowser } from './JpFileBrowser';
 import { MimeData } from '@lumino/coreutils';
 import { Contents } from '@jupyterlab/services';
-import { Dialog, showDialog } from '@jupyterlab/apputils';
+import { Dialog, showDialog, showErrorMessage } from '@jupyterlab/apputils';
+import { requestAPI } from './handler';
+import INativeUploadResponse = DropZone.INativeUploadResponse;
+import { UploadAnimation } from './FileTransferAnimations';
 
 const source: { drag: null | Drag } = { drag: null };
 
@@ -21,9 +24,24 @@ export const DropZone: React.FC<DropZone.IProps> = ({
   const [mode, setMode] = useState<'default' | 'hover'>('default');
   const [uploading, setUploading] = useState<boolean>(false);
 
+  // to be used in memoized values or callbacks if we don't
+  // need them to change definition when 'uploading' state is changed
+  const uploadingRef = useRef<boolean>(uploading);
+  // keep uploadingRef in sync with uploading state
+  useEffect(() => {
+    uploadingRef.current = uploading;
+  }, [uploading]);
+
   const dropZoneRef = useRef<HTMLDivElement>(null);
 
   const bucketBrowser = useBucketContext().fileBrowser;
+
+  const notAllowedUpload = useMemo(() => {
+    return {
+      title: 'Not allowed!',
+      error: 'Please wait for the previous upload to finish!'
+    };
+  }, []);
 
   /**
    * Validate if source of a drag event is a file in jp filebrowser and start the custom drag
@@ -50,11 +68,7 @@ export const DropZone: React.FC<DropZone.IProps> = ({
     }
 
     if (!isValidDragSource) {
-      showDialog({
-        title: 'Not allowed!',
-        body: 'This operation is not yet supported!',
-        buttons: [Dialog.okButton({ label: 'OK' })]
-      });
+      console.warn('Did not start a drag operation!');
       return;
     }
 
@@ -73,7 +87,9 @@ export const DropZone: React.FC<DropZone.IProps> = ({
       proposedAction: 'copy'
     });
     source.drag.mimeData.setData('text/plain', JSON.stringify(dragSource));
-    source.drag.start(ev.clientX, ev.clientY);
+    source.drag
+      .start(ev.clientX, ev.clientY)
+      .then(() => console.log('drag ended'));
   }, []);
 
   const jpEventsHandler = useMemo(() => {
@@ -88,7 +104,9 @@ export const DropZone: React.FC<DropZone.IProps> = ({
             handler._dragOver(ev as IDragEvent);
             break;
           case 'lm-drop':
-            handler._drop(ev as IDragEvent);
+            handler
+              ._drop(ev as IDragEvent)
+              .then(() => console.log('drop handled'));
             break;
           case 'lm-dragleave':
             handler._dragLeave(ev as IDragEvent);
@@ -117,16 +135,26 @@ export const DropZone: React.FC<DropZone.IProps> = ({
       _drop: async (ev: IDragEvent): Promise<void> => {
         ev.preventDefault();
         ev.stopPropagation();
+        if (uploadingRef.current) {
+          await showErrorMessage(
+            notAllowedUpload.title,
+            notAllowedUpload.error
+          );
+          return;
+        }
         setUploading(true);
         if (ev.source && (ev.source as IDragInitiator).action) {
           await ev.source.action();
           await finishAction();
         } else {
-          console.log('drag initiator does not provide an action!');
+          console.warn(
+            'Did not upload file to bucket since drag initiator does not provide an action!'
+          );
         }
 
         Drag.overrideCursor('auto');
         setMode('default');
+        setUploading(false);
       }
     };
 
@@ -161,8 +189,52 @@ export const DropZone: React.FC<DropZone.IProps> = ({
     setMode('default');
   }, []);
 
-  const nativeDrop = useCallback((e: React.DragEvent) => {
+  const nativeDrop = useCallback(async (e: React.DragEvent) => {
     e.preventDefault();
+    e.stopPropagation();
+    if (uploadingRef.current) {
+      await showErrorMessage(notAllowedUpload.title, notAllowedUpload.error);
+      return;
+    }
+    setUploading(true);
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      if (e.dataTransfer.files.length > 1) {
+        await showErrorMessage(
+          'Unsupported',
+          'Currently you can only upload a file at a time!'
+        );
+      } else {
+        try {
+          let toDir = '';
+          if (bucketBrowser.currentDirectory) {
+            toDir = bucketBrowser.currentDirectory.absolutePath;
+          }
+          const fileToUpload = e.dataTransfer.files[0];
+          const fileName = fileToUpload.name;
+          const bucket = bucketBrowser.bucket;
+          const uploadUrlResp = await requestAPI<INativeUploadResponse>(
+            `local_upload?to_bucket=${encodeURIComponent(
+              bucket
+            )}&to_path=${encodeURIComponent(toDir)}&with_name=${fileName}`
+          );
+          const uploadResp = await fetch(uploadUrlResp.url, {
+            method: 'PUT',
+            body: fileToUpload
+          });
+          if (uploadResp.ok) {
+            await showDialog({
+              title: 'Upload Success!',
+              body: `${fileName} was successfully uploaded to ${toDir}!`,
+              buttons: [Dialog.okButton({ label: 'OK' })]
+            });
+            await finishAction();
+          }
+        } catch (e) {
+          await showErrorMessage('Upload Failed', e);
+        }
+      }
+    }
+    setUploading(false);
     setMode('default');
   }, []);
 
@@ -174,11 +246,14 @@ export const DropZone: React.FC<DropZone.IProps> = ({
       onDragLeave={nativeDragLeave}
       onDrop={nativeDrop}
       style={{
-        display: bucketBrowser.currentDirectory || show ? 'block' : 'none'
+        display: show ? 'block' : 'none'
       }}
     >
       {uploading ? (
-        <p className={'bucket-text-info'}>Uploading files...</p>
+        <>
+          <p className={'bucket-text-info'}>Uploading files...</p>
+          <UploadAnimation />
+        </>
       ) : (
         <p className={'bucket-text-info'}>Drop your files here for upload.</p>
       )}
@@ -190,6 +265,11 @@ export namespace DropZone {
   export interface IProps {
     show: boolean;
     finishAction: Callable | AsyncCallable;
+  }
+
+  export interface INativeUploadResponse {
+    success: boolean;
+    url: string;
   }
 }
 

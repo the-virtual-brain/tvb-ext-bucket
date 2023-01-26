@@ -1,5 +1,6 @@
 import React, { useCallback, useState } from 'react';
 import { BucketFileBrowser } from './bucketFileBrowser';
+import { DownloadAnimation } from './FileTransferAnimations';
 
 export const DragDownload: React.FC<DragDownloadNamespace.IProps> = ({
   children,
@@ -32,11 +33,7 @@ export const DragDownload: React.FC<DragDownloadNamespace.IProps> = ({
       className={'align-flex-horizontal'}
     >
       {children}
-      {downloading && (
-        <span className={'bucket-DownloadAnimation'}>
-          <i className={'fa fa-arrow-down'} />
-        </span>
-      )}
+      {downloading && <DownloadAnimation />}
     </div>
   );
 };

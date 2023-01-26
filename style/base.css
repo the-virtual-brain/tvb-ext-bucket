@@ -163,6 +163,7 @@
   }
 }
 
+/* download animation style */
 .bucket-DownloadAnimation {
   display: inline-block;
   z-index: 2;
@@ -182,6 +183,30 @@
   animation: linear 0.5s rain infinite;
 }
 
+/* end download animation style */
+
+/* upload animation style */
+.bucket-UploadAnimation {
+  display: inline-block;
+  z-index: 2;
+  position: relative;
+  height: 0.8em;
+  width: 1em;
+  margin-left: 0.5em;
+  margin-top: 0.2em;
+  overflow: hidden;
+  border-top: solid 1px var(--bucket-download-color);
+}
+
+.bucket-UploadAnimation > :first-child {
+  color: var(--bucket-download-color);
+  position: absolute;
+  z-index: 1;
+  animation: reverse 0.5s rain infinite;
+}
+
+/* end upload animation style */
+
 .bucket-DropZone {
   margin: 0 auto;
   padding: 0.5em;
@@ -189,6 +214,9 @@
   height: 4em;
   border: dashed 2px var(--bucket-text-info-color);
   border-radius: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .default {

@@ -148,3 +148,25 @@ class BucketWrapper:
         except RuntimeError:
             return False
         return True
+
+    def upload_bytes(self, to_bucket, with_name, to_path):
+        """
+        Upload a bytes stream to a bucket at specified path with specified name
+        Parameters
+        ----------
+        to_bucket
+        with_name
+        to_path
+
+        Returns
+        -------
+
+        """
+        target = f'{to_path}/{with_name}'.lstrip('/')
+        bucket = self._get_bucket(to_bucket)
+        resp = bucket.client.put(f"/v1/{bucket.target}/{bucket.dataproxy_entity_name}/{target}")
+        upload_url = resp.json().get("url")
+        if upload_url is None:
+            raise RuntimeError(f"Bucket.upload did not get upload url.")
+        return upload_url
+
