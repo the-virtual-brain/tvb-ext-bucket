@@ -5,7 +5,7 @@ import React, {
   useCallback,
   useMemo
 } from 'react';
-import { Drag } from '@lumino/dragdrop';
+import { Drag, IDragEvent } from '@lumino/dragdrop'; // must use the deprecated interface
 import { useBucketContext } from './BucketContext';
 import { JpFileBrowser } from './JpFileBrowser';
 import { MimeData } from '@lumino/coreutils';
@@ -14,7 +14,10 @@ import { Dialog, showDialog } from '@jupyterlab/apputils';
 
 const source: { drag: null | Drag } = { drag: null };
 
-export const DropZone: React.FC = () => {
+export const DropZone: React.FC<DropZone.IProps> = ({
+  show,
+  finishAction
+}: DropZone.IProps) => {
   const [mode, setMode] = useState<'default' | 'hover'>('default');
   const [uploading, setUploading] = useState<boolean>(false);
 
@@ -46,7 +49,6 @@ export const DropZone: React.FC = () => {
       item = possibleTargets?.next();
     }
 
-    console.log('items: ', items);
     if (!isValidDragSource) {
       showDialog({
         title: 'Not allowed!',
@@ -55,58 +57,84 @@ export const DropZone: React.FC = () => {
       });
       return;
     }
+
     const dragSource = items[0];
+    // create the drag initiator
+    const initiator: IDragInitiator = {
+      source: dragSource,
+      action: async () => {
+        console.log('Calling source action()');
+        const [path, name] = [dragSource.path, dragSource.name];
+        await bucketBrowser.currentDirectory?.upload(path, name);
+      }
+    };
     source.drag = new Drag({
       mimeData: new MimeData(),
-      source: items[0],
+      source: initiator,
       proposedAction: 'copy'
     });
-    source.drag.mimeData.setData('text/plain', dragSource);
+    source.drag.mimeData.setData('text/plain', JSON.stringify(dragSource));
+    source.drag.start(ev.clientX, ev.clientY);
   }, []);
 
   const jpEventsHandler = useMemo(() => {
-    return {
+    const handler = {
       handleEvent: (ev: Event): void => {
         console.log('handling: ', ev.type);
         switch (ev.type) {
           case 'lm-dragenter':
-            jpEventsHandler._dragEnter(ev);
+            handler._dragEnter(ev as IDragEvent);
             break;
           case 'lm-dragover':
-            jpEventsHandler._dragOver(ev);
+            handler._dragOver(ev as IDragEvent);
             break;
           case 'lm-drop':
-            jpEventsHandler._drop(ev);
+            handler._drop(ev as IDragEvent);
+            break;
+          case 'lm-dragleave':
+            handler._dragLeave(ev as IDragEvent);
             break;
         }
       },
-      _dragEnter: (ev: Event): void => {
-        ev.preventDefault();
-        setMode('hover');
-        console.log('lm-dragenter : should add drop target class');
-      },
-      _dragOver: (ev: Event): void => {
+      _dragEnter: (ev: IDragEvent): void => {
         ev.preventDefault();
         ev.stopPropagation();
         setMode('hover');
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        ev.dropAction = 'copy'; // needed to trigger lm-drop
+        Drag.overrideCursor('pointer');
       },
-      _drop: (ev: Event): void => {
+      _dragOver: (ev: IDragEvent): void => {
+        ev.preventDefault();
+        ev.stopPropagation();
+        ev.dropAction = ev.proposedAction; // needed to trigger lm-drop
+        Drag.overrideCursor('pointer');
+        setMode('hover');
+      },
+      _dragLeave: (ev: IDragEvent): void => {
+        ev.preventDefault();
+        ev.stopPropagation();
+        Drag.overrideCursor('auto');
+        setMode('default');
+      },
+      _drop: async (ev: IDragEvent): Promise<void> => {
         ev.preventDefault();
         ev.stopPropagation();
         console.log('DROP');
-        setMode('default');
+        console.log('drop source: ', ev.source);
+        console.log('drop mimeData: ', ev.mimeData.getData('text/plain'));
         setUploading(true);
-        const [path, name] = [
-          source.drag?.source.path,
-          source.drag?.source.name
-        ];
-        bucketBrowser.currentDirectory?.upload(path, name);
-        setUploading(false);
+        if (ev.source && (ev.source as IDragInitiator).action) {
+          await ev.source.action();
+          await finishAction();
+        } else {
+          console.log('drag initiator does not provide an action!');
+        }
+
+        Drag.overrideCursor('auto');
+        setMode('default');
       }
     };
+
+    return handler;
   }, []);
 
   useEffect(() => {
@@ -131,6 +159,7 @@ export const DropZone: React.FC = () => {
 
   const nativeDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
+    console.log('native drag over');
     setMode('hover');
   }, []);
 
@@ -146,39 +175,6 @@ export const DropZone: React.FC = () => {
     setMode('default');
   }, []);
 
-  const dragEnter = useCallback((e: Event) => {
-    e.preventDefault();
-    Drag.overrideCursor('pointer');
-    setMode('hover');
-  }, []);
-
-  const dragOver = useCallback((e: Event) => {
-    e.preventDefault();
-    Drag.overrideCursor('pointer');
-    setMode('hover');
-  }, []);
-
-  const dragLeave = useCallback((e: Event) => {
-    e.preventDefault();
-    Drag.overrideCursor('auto');
-    setMode('default');
-  }, []);
-
-  useEffect(() => {
-    if (!dropZoneRef.current) {
-      return;
-    }
-    dropZoneRef.current.addEventListener('lm-dragenter', dragEnter);
-    dropZoneRef.current.addEventListener('lm-dragover', dragOver);
-    dropZoneRef.current.addEventListener('lm-dragleave', dragLeave);
-
-    return () => {
-      dropZoneRef.current?.removeEventListener('lm-dragenter', dragEnter);
-      dropZoneRef.current?.removeEventListener('lm-dragover', dragOver);
-      dropZoneRef.current?.removeEventListener('lm-dragleave', dragLeave);
-    };
-  }, [dropZoneRef]);
-
   return (
     <div
       className={`bucket-DropZone ${mode}`}
@@ -186,7 +182,9 @@ export const DropZone: React.FC = () => {
       onDragOver={nativeDragOver}
       onDragLeave={nativeDragLeave}
       onDrop={nativeDrop}
-      style={{ display: bucketBrowser.currentDirectory ? 'block' : 'none' }}
+      style={{
+        display: bucketBrowser.currentDirectory || show ? 'block' : 'none'
+      }}
     >
       {uploading ? (
         <p className={'bucket-text-info'}>Uploading files...</p>
@@ -196,3 +194,18 @@ export const DropZone: React.FC = () => {
     </div>
   );
 };
+
+export namespace DropZone {
+  export interface IProps {
+    show: boolean;
+    finishAction: Callable | AsyncCallable;
+  }
+}
+
+export interface IDragInitiator {
+  source: any;
+  action: AsyncCallable | Callable | undefined;
+}
+
+export type AsyncCallable = () => Promise<any>;
+export type Callable = () => any;
