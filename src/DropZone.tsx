@@ -63,7 +63,6 @@ export const DropZone: React.FC<DropZone.IProps> = ({
     const initiator: IDragInitiator = {
       source: dragSource,
       action: async () => {
-        console.log('Calling source action()');
         const [path, name] = [dragSource.path, dragSource.name];
         await bucketBrowser.currentDirectory?.upload(path, name);
       }
@@ -118,9 +117,6 @@ export const DropZone: React.FC<DropZone.IProps> = ({
       _drop: async (ev: IDragEvent): Promise<void> => {
         ev.preventDefault();
         ev.stopPropagation();
-        console.log('DROP');
-        console.log('drop source: ', ev.source);
-        console.log('drop mimeData: ', ev.mimeData.getData('text/plain'));
         setUploading(true);
         if (ev.source && (ev.source as IDragInitiator).action) {
           await ev.source.action();
@@ -138,7 +134,6 @@ export const DropZone: React.FC<DropZone.IProps> = ({
   }, []);
 
   useEffect(() => {
-    console.log('set events');
     dropZoneRef.current?.addEventListener('lm-dragenter', jpEventsHandler);
     dropZoneRef.current?.addEventListener('lm-dragleave', jpEventsHandler);
     dropZoneRef.current?.addEventListener('lm-dragover', jpEventsHandler);
@@ -148,7 +143,6 @@ export const DropZone: React.FC<DropZone.IProps> = ({
 
     // cleanup on unmount
     return () => {
-      console.log('removing events');
       node?.removeEventListener('mousedown', handleJpBrowserDragStart);
       dropZoneRef.current?.removeEventListener('lm-dragenter', jpEventsHandler);
       dropZoneRef.current?.removeEventListener('lm-dragleave', jpEventsHandler);
@@ -159,19 +153,16 @@ export const DropZone: React.FC<DropZone.IProps> = ({
 
   const nativeDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
-    console.log('native drag over');
     setMode('hover');
   }, []);
 
   const nativeDragLeave = useCallback((e: React.DragEvent) => {
     e.preventDefault();
-    console.log('native drag end');
     setMode('default');
   }, []);
 
   const nativeDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
-    console.log('native drop');
     setMode('default');
   }, []);
 
