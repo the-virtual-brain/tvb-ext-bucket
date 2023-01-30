@@ -71,6 +71,7 @@ class DownloadUrlHandler(APIHandler):
     """
     Handler for download urls
     """
+    @tornado.web.authenticated
     def get(self):
         response = {
             'success': False,
@@ -144,6 +145,20 @@ class LocalUploadHandler(APIHandler):
         self.finish(response)
 
 
+class ObjectsHandler(APIHandler):
+    """
+    Handler for objects in bucket
+    """
+    @tornado.web.authenticated
+    def delete(self, bucket_name, file_path):
+        bucket = str(bucket_name)
+        file_str = str(file_path)
+        LOGGER.warning(f'DELETE: file {file_str} in bucket {bucket}!')
+        wrapper = BucketWrapper()
+        delete_response = wrapper.delete_file_from_bucket(bucket, file_str)
+        self.finish(json.dumps(delete_response))
+
+
 def setup_handlers(web_app):
     host_pattern = ".*$"
 
@@ -153,12 +168,14 @@ def setup_handlers(web_app):
     download_ulr_pattern = url_path_join(base_url, "tvb_ext_bucket", "download_url")
     upload_pattern = url_path_join(base_url, "tvb_ext_bucket", "upload")
     local_upload_pattern = url_path_join(base_url, "tvb_ext_bucket", "local_upload")
+    objects_handler = url_path_join(base_url, "tvb_ext_bucket", r"objects/(.*)/(.*)")
 
     handlers = [
         (bucket_pattern, BucketsHandler),
         (download_pattern, DownloadHandler),
         (download_ulr_pattern, DownloadUrlHandler),
         (upload_pattern, UploadHandler),
-        (local_upload_pattern, LocalUploadHandler)
+        (local_upload_pattern, LocalUploadHandler),
+        (objects_handler, ObjectsHandler)
     ]
     web_app.add_handlers(host_pattern, handlers)

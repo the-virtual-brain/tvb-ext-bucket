@@ -174,3 +174,12 @@ class BucketWrapper:
             raise RuntimeError(f"Bucket.upload did not get upload url.")
         return upload_url
 
+    def delete_file_from_bucket(self, bucket_name, file_path):
+        dataproxy_file = self._get_dataproxy_file(file_path, bucket_name)
+        resp = {'success': False, 'message': ''}
+        try:
+            dataproxy_file.delete()
+            resp = {'success': True, 'message': f'File {file_path} was deleted from bucket {bucket_name}'}
+        except (Unauthorized, AssertionError) as e:
+            resp['message'] = str(e)
+        return resp

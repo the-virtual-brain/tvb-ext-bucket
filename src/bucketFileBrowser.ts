@@ -356,6 +356,21 @@ export namespace BucketFileBrowser {
       return url;
     }
 
+    /**
+     * Method to delete this file from its bucket
+     */
+    async delete(): Promise<IDeleteResponse | void> {
+      try {
+        const response = await requestAPI<IDeleteResponse>(
+          `objects/${this.bucket}/${this.absolutePath}`,
+          { method: 'DELETE' }
+        );
+        return response;
+      } catch (e) {
+        await showErrorMessage('Failed', e);
+      }
+    }
+
     private _validate(): void {
       if (!this.absolutePath.endsWith(this.name)) {
         throw new FilePathMatchError(
@@ -373,5 +388,10 @@ export namespace BucketFileBrowser {
   export interface IDownloadUrl {
     success: boolean;
     url: string;
+  }
+
+  export interface IDeleteResponse {
+    success: boolean;
+    message: string;
   }
 }

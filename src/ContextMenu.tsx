@@ -1,8 +1,8 @@
 import React, { useCallback, useState, useEffect } from 'react';
-import { downloadIcon } from '@jupyterlab/ui-components';
+import { downloadIcon, deleteIcon } from '@jupyterlab/ui-components';
 import { ContextMenuItem } from './ContextMenuItem';
 import { useBucketContext } from './BucketContext';
-import { showErrorMessage } from '@jupyterlab/apputils';
+import { Dialog, showDialog, showErrorMessage } from '@jupyterlab/apputils';
 
 export const ContextMenu: React.FC<ContextMenuNamespace.IProps> = ({
   name,
@@ -51,8 +51,30 @@ export const ContextMenu: React.FC<ContextMenuNamespace.IProps> = ({
     } else {
       await showErrorMessage(
         'Download failed!',
-        `Can't find file ${name} in directory ${browser.currentDirectory?.name}`
+        `Can't find file ${name} in directory ${browser.currentDirectory?.name}. Please refresh and try again!`
       );
+    }
+  }, [name]);
+
+  const deleteFile = useCallback(async () => {
+    const file = browser.currentDirectory?.files.get(name);
+    if (!file) {
+      await showErrorMessage(
+        'Deletion failed!',
+        `Can't find file ${name} in directory ${browser.currentDirectory?.name}. Please refresh and try again!`
+      );
+    } else {
+      const resp = await file.delete();
+      if (!resp) {
+        return;
+      }
+      await showDialog({
+        title: resp.success ? 'Success!' : 'Failed!',
+        body: `File ${name} was ${resp.success ? '' : 'not'} deleted! \n ${
+          resp.message ? resp.message : ''
+        }`,
+        buttons: [Dialog.okButton({ label: 'OK' })]
+      });
     }
   }, [name]);
 
@@ -78,6 +100,11 @@ export const ContextMenu: React.FC<ContextMenuNamespace.IProps> = ({
             label={'Local Download'}
             action={localDownload}
             icon={downloadIcon}
+          />
+          <ContextMenuItem
+            label={'Delete'}
+            action={deleteFile}
+            icon={deleteIcon}
           />
         </ul>
       </div>
