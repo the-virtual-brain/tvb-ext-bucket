@@ -308,7 +308,7 @@ export namespace BucketFileBrowser {
     /**
      * Calls the endpoint to download this file from bucket to current path in jp file browser
      */
-    public async download(): Promise<void> {
+    async download(): Promise<void> {
       try {
         const filePath = this.absolutePath;
 
@@ -338,6 +338,24 @@ export namespace BucketFileBrowser {
       }
     }
 
+    /**
+     * Get a download URL for this file.
+     * Note: to download the file you must make a GET request to the URL returned by this method
+     */
+    async getDownloadUrl(): Promise<string> {
+      let url = '';
+      try {
+        const response = await requestAPI<IDownloadUrl>(
+          `download_url?file=${this.absolutePath}&bucket=${this.bucket}`
+        );
+        url = response.url;
+      } catch (e) {
+        await showErrorMessage('Failed', e);
+      }
+
+      return url;
+    }
+
     private _validate(): void {
       if (!this.absolutePath.endsWith(this.name)) {
         throw new FilePathMatchError(
@@ -348,6 +366,11 @@ export namespace BucketFileBrowser {
   }
 
   export interface INativeUploadResponse {
+    success: boolean;
+    url: string;
+  }
+
+  export interface IDownloadUrl {
     success: boolean;
     url: string;
   }

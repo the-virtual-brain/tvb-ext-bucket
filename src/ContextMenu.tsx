@@ -38,6 +38,24 @@ export const ContextMenu: React.FC<ContextMenuNamespace.IProps> = ({
     }
   }, [name]);
 
+  const localDownload = useCallback(async () => {
+    const file = browser.currentDirectory?.files.get(name);
+    if (file) {
+      const url = await file.getDownloadUrl();
+      const anchor = document.createElement('a');
+      anchor.href = url;
+      anchor.download = '';
+      document.body.appendChild(anchor);
+      anchor.click();
+      document.body.removeChild(anchor);
+    } else {
+      await showErrorMessage(
+        'Download failed!',
+        `Can't find file ${name} in directory ${browser.currentDirectory?.name}`
+      );
+    }
+  }, [name]);
+
   return (
     <div
       onContextMenu={handleContext}
@@ -54,6 +72,11 @@ export const ContextMenu: React.FC<ContextMenuNamespace.IProps> = ({
           <ContextMenuItem
             label={'Download'}
             action={download}
+            icon={downloadIcon}
+          />
+          <ContextMenuItem
+            label={'Local Download'}
+            action={localDownload}
             icon={downloadIcon}
           />
         </ul>

@@ -67,6 +67,28 @@ class DownloadHandler(APIHandler):
             self.finish(response)
 
 
+class DownloadUrlHandler(APIHandler):
+    """
+    Handler for download urls
+    """
+    def get(self):
+        response = {
+            'success': False,
+            'message': '',
+            'url': ''
+        }
+        try:
+            file_path = self.get_argument('file')
+            bucket = self.get_argument('bucket')
+            bucket_wrapper = BucketWrapper()
+            url = bucket_wrapper.get_download_url(file_path, bucket)
+            response['success'] = True
+            response['url'] = url
+        except (MissingArgumentError, FileNotFoundError) as e:
+            response['message'] = e.log_message
+        self.finish(json.dumps(response))
+
+
 class UploadHandler(APIHandler):
     @tornado.web.authenticated
     def get(self):
@@ -128,12 +150,14 @@ def setup_handlers(web_app):
     base_url = web_app.settings["base_url"]
     bucket_pattern = url_path_join(base_url, "tvb_ext_bucket", "buckets")
     download_pattern = url_path_join(base_url, "tvb_ext_bucket", "download")
+    download_ulr_pattern = url_path_join(base_url, "tvb_ext_bucket", "download_url")
     upload_pattern = url_path_join(base_url, "tvb_ext_bucket", "upload")
     local_upload_pattern = url_path_join(base_url, "tvb_ext_bucket", "local_upload")
 
     handlers = [
         (bucket_pattern, BucketsHandler),
         (download_pattern, DownloadHandler),
+        (download_ulr_pattern, DownloadUrlHandler),
         (upload_pattern, UploadHandler),
         (local_upload_pattern, LocalUploadHandler)
     ]

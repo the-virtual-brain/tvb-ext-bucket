@@ -7,11 +7,12 @@
 
 from ebrains_drive import BucketApiClient
 from ebrains_drive.bucket import Bucket
+from ebrains_drive.files import DataproxyFile
 
 from ebrains_drive.exceptions import Unauthorized
 
 from tvb_ext_bucket.logger.builder import get_logger
-from tvb_ext_bucket.exceptions import CollabTokenError, CollabAccessError
+from tvb_ext_bucket.exceptions import CollabTokenError, CollabAccessError, DataproxyFileNotFound
 import os
 
 
@@ -65,6 +66,16 @@ class BucketWrapper:
             raise CollabAccessError(e)
         return bucket
 
+    def _get_dataproxy_file(self, file_path, bucket_name):
+        # type: (str, str) -> DataproxyFile
+        """
+        Get the DataProxy file corresponding to the path <file_path> in bucket <bucket_name>
+        """
+        bucket = self._get_bucket(bucket_name)
+        # find first dataproxy file corresponding to provided path
+        dataproxy_file = next((f for f in bucket.ls() if f.name == file_path), None)
+        return dataproxy_file
+
     def get_files_in_bucket(self, bucket_name):
         # type: (str) -> list[str]
         """
@@ -102,20 +113,9 @@ class BucketWrapper:
         """
         download a file with absolute path as <file_path> from bucket with name <bucket_name>
         to location <location>
-        Parameters
-        ----------
-        file_path
-        bucket_name
-        location
-
-        Returns
-        -------
-
         """
         LOGGER.info(f'DOWNLOADING: attempt to download {file_path} from bucket {bucket_name} to location {location}')
-        bucket = self._get_bucket(bucket_name)
-        # find first dataproxy file corresponding to provided path
-        dataproxy_file = next((f for f in bucket.ls() if f.name == file_path), None)
+        dataproxy_file = self._get_dataproxy_file(file_path, bucket_name)
         LOGGER.info(f'FOUND: File found: {dataproxy_file}')
         if dataproxy_file is None:
             return False
@@ -125,6 +125,17 @@ class BucketWrapper:
             content = dataproxy_file.get_content()
             f.write(content)
         return True
+
+    def get_download_url(self, file_path, bucket_name):
+        # type: (str, str) -> str
+        """
+        Get download URL for a dataproxy file at <file_path> in bucket <bucket_name>
+        """
+        LOGGER.info(f'Attempting to get download ulr for file {file_path} from bucket {bucket_name}')
+        dataproxy_file = self._get_dataproxy_file(file_path, bucket_name)
+        if not dataproxy_file:
+            raise DataproxyFileNotFound(f'Could not find DataproxyFile {file_path} in bucket {bucket_name}')
+        return dataproxy_file.get_download_link()
 
     def upload_file_to(self, source_file, bucket, destination, filename):
         # type: (str, str, str, str) -> bool
