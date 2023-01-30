@@ -101,12 +101,8 @@ class LocalUploadHandler(APIHandler):
     @tornado.web.authenticated
     def get(self):
         """
-        get route of the handler. Returns a url to send data to with a "PUT" request
-        Returns
-        -------
-
+        get route of the handler. Returns an url to send data to with a "PUT" request
         """
-        # get data from request
         response = {
             'success': False,
             'url': ''
@@ -116,11 +112,13 @@ class LocalUploadHandler(APIHandler):
             with_name = self.get_argument('with_name')
             to_path = self.get_argument('to_path')
             wrapper = BucketWrapper()
-            url = wrapper.upload_bytes(to_bucket, with_name, to_path)
+            url = wrapper.get_bucket_upload_url(to_bucket, with_name, to_path)
             response['success'] = True
             response['url'] = url
         except MissingArgumentError as e:
             response['message'] = e.log_message
+        except RuntimeError as e:
+            response['message'] = str(e)
         self.finish(response)
 
 

@@ -11,11 +11,7 @@ import { JpFileBrowser } from './JpFileBrowser';
 import { MimeData } from '@lumino/coreutils';
 import { Contents } from '@jupyterlab/services';
 import { Dialog, showDialog, showErrorMessage } from '@jupyterlab/apputils';
-import { requestAPI } from './handler';
-import INativeUploadResponse = DropZone.INativeUploadResponse;
 import { UploadAnimation } from './FileTransferAnimations';
-
-const source: { drag: null | Drag } = { drag: null };
 
 export const DropZone: React.FC<DropZone.IProps> = ({
   show,
@@ -24,8 +20,8 @@ export const DropZone: React.FC<DropZone.IProps> = ({
   const [mode, setMode] = useState<'default' | 'hover'>('default');
   const [uploading, setUploading] = useState<boolean>(false);
 
-  // to be used in memoized values or callbacks if we don't
-  // need them to change definition when 'uploading' state is changed
+  // is needed in memoized values or callbacks to avoid
+  // adding 'uploading' state to their dependency array
   const uploadingRef = useRef<boolean>(uploading);
   // keep uploadingRef in sync with uploading state
   useEffect(() => {
@@ -81,15 +77,13 @@ export const DropZone: React.FC<DropZone.IProps> = ({
         await bucketBrowser.currentDirectory?.upload(path, name);
       }
     };
-    source.drag = new Drag({
+    const drag = new Drag({
       mimeData: new MimeData(),
       source: initiator,
       proposedAction: 'copy'
     });
-    source.drag.mimeData.setData('text/plain', JSON.stringify(dragSource));
-    source.drag
-      .start(ev.clientX, ev.clientY)
-      .then(() => console.log('drag ended'));
+    drag.mimeData.setData('text/plain', JSON.stringify(dragSource));
+    drag.start(ev.clientX, ev.clientY).then(() => console.log('drag ended'));
   }, []);
 
   const jpEventsHandler = useMemo(() => {
@@ -205,26 +199,22 @@ export const DropZone: React.FC<DropZone.IProps> = ({
         );
       } else {
         try {
-          let toDir = '';
-          if (bucketBrowser.currentDirectory) {
-            toDir = bucketBrowser.currentDirectory.absolutePath;
-          }
           const fileToUpload = e.dataTransfer.files[0];
           const fileName = fileToUpload.name;
-          const bucket = bucketBrowser.bucket;
-          const uploadUrlResp = await requestAPI<INativeUploadResponse>(
-            `local_upload?to_bucket=${encodeURIComponent(
-              bucket
-            )}&to_path=${encodeURIComponent(toDir)}&with_name=${fileName}`
+          const uploadUrl = await bucketBrowser.currentDirectory?.getUploadUrl(
+            fileName
           );
-          const uploadResp = await fetch(uploadUrlResp.url, {
+          if (!uploadUrl) {
+            return;
+          }
+          const uploadResp = await fetch(uploadUrl, {
             method: 'PUT',
             body: fileToUpload
           });
           if (uploadResp.ok) {
             await showDialog({
               title: 'Upload Success!',
-              body: `${fileName} was successfully uploaded to ${toDir}!`,
+              body: `${fileName} was uploaded to ${bucketBrowser.currentDirectory?.absolutePath}/${fileName}`,
               buttons: [Dialog.okButton({ label: 'OK' })]
             });
             await finishAction();
@@ -265,11 +255,6 @@ export namespace DropZone {
   export interface IProps {
     show: boolean;
     finishAction: Callable | AsyncCallable;
-  }
-
-  export interface INativeUploadResponse {
-    success: boolean;
-    url: string;
   }
 }
 

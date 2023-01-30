@@ -249,11 +249,39 @@ export namespace BucketFileBrowser {
 
       return contents;
     }
+
+    /**
+     * Uploads a file from drive to bucket in this directory
+     * @param fileSource file to be uploaded from drive in the form path/to/file
+     * @param filename name of the file after upload
+     */
     async upload(fileSource: string, filename: string): Promise<void> {
       const result = requestAPI(
         `upload?source_file=${fileSource}&bucket=${this.bucket}&destination=${this.absolutePath}&filename=${filename}`
       );
       console.log('result: ', result);
+    }
+
+    /**
+     * Get an upload URL for a file to this directory in the same bucket as this directory
+     * Note: to upload the file make a PUT request with a bytes stream to the URL returned by this method
+     * @param fileName
+     */
+    async getUploadUrl(fileName: string): Promise<string> {
+      const uploadUrlResponse = await requestAPI<INativeUploadResponse>(
+        `local_upload?to_bucket=${
+          this.bucket
+        }&with_name=${fileName}&to_path=${encodeURIComponent(
+          this.absolutePath
+        )}`
+      );
+      if (!uploadUrlResponse.success) {
+        await showErrorMessage(
+          'Error',
+          'Could not get an upload url for this file!'
+        );
+      }
+      return uploadUrlResponse.url;
     }
   }
 
@@ -317,5 +345,10 @@ export namespace BucketFileBrowser {
         );
       }
     }
+  }
+
+  export interface INativeUploadResponse {
+    success: boolean;
+    url: string;
   }
 }

@@ -149,18 +149,11 @@ class BucketWrapper:
             return False
         return True
 
-    def upload_bytes(self, to_bucket, with_name, to_path):
+    def get_bucket_upload_url(self, to_bucket, with_name, to_path):
+        # type: (str, str, str) -> str
         """
-        Upload a bytes stream to a bucket at specified path with specified name
-        Parameters
-        ----------
-        to_bucket
-        with_name
-        to_path
-
-        Returns
-        -------
-
+        Get an upload url in the bucket <to_bucket> with a path <to_path> and the name <with_name>.
+        Any file uploaded to this url should be a bytes stream and the method should be 'PUT'.
         """
         target = f'{to_path}/{with_name}'.lstrip('/')
         bucket = self._get_bucket(to_bucket)

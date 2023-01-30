@@ -95,7 +95,10 @@ export const BucketSpace = (): JSX.Element => {
           );
         })}
       </ul>
-      <DropZone show={!showSpinner} finishAction={getBucket} />
+      <DropZone
+        show={!showSpinner && currentDir !== null}
+        finishAction={getBucket}
+      />
     </>
   );
 };
