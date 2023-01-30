@@ -1,6 +1,6 @@
 import {BucketFileBrowser} from "../bucketFileBrowser";
-import {getError} from "./testUtils";
-import {BreadCrumbNotFoundError, FileNameError, FilePathMatchError, InvalidDirectoryError} from "../exceptions";
+import {getError, NoErrorThrownError} from "./testUtils";
+import {BreadCrumbNotFoundError, FilePathMatchError, InvalidDirectoryError} from "../exceptions";
 import BucketDirectory = BucketFileBrowser.BucketDirectory;
 import BucketFile = BucketFileBrowser.BucketFile;
 import {requestAPI} from "../handler";
@@ -70,11 +70,11 @@ describe('Test BucketFile', () => {
         expect(err).toBeInstanceOf(FilePathMatchError);
     });
 
-    it('Throws FileNameError when not a valid file name', async () => {
+    it('Does not throw error when not a valid file name (object storage does not enforce naming)', async () => {
         const name = 'test.';
-        let path = 'home/test.p';
+        let path = 'home/test.';
         let err = await getError(() => new BucketFile(name, path, 'test'));
-        expect(err).toBeInstanceOf(FileNameError);
+        expect(err).toBeInstanceOf(NoErrorThrownError);
     });
 
     it('Tests download success', async () => {

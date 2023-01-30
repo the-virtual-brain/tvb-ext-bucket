@@ -12,6 +12,7 @@ import pytest
 
 from tvb_ext_bucket.ebrains_drive_wrapper import BucketWrapper
 from tvb_ext_bucket.exceptions import CollabAccessError
+from ebrains_drive.exceptions import Unauthorized
 
 
 class MockFile:
@@ -29,7 +30,7 @@ class MockBucket:
         return [f for f in self.files if f.name.startswith(prefix)]
 
     def upload(self, _file_obj, name):
-        if name == 'err':
+        if name == '/err':
             raise RuntimeError('no upload')
         self.files.append(MockFile(name))
 
@@ -41,7 +42,10 @@ class MockBuckets:
         }
 
     def get_bucket(self, name):
-        return self.buckets[name]
+        try:
+            return self.buckets[name]
+        except KeyError:
+            raise Unauthorized('Unauthorized in tests')
 
 
 class MockBucketApiClient:
@@ -91,7 +95,7 @@ def test_raises_error_if_source_file_does_not_exist(mock_client):
         os.rmdir(temp_dir)
 
 
-def test_raises_error_if_bucket_does_not_exist(temp_txt_file):
+def test_raises_error_if_bucket_does_not_exist(temp_txt_file, mock_client):
     client = BucketWrapper()
     source_path = temp_txt_file.absolute()
     dest_path = '/'
