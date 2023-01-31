@@ -47,7 +47,7 @@ describe('Test ContextMenu', () => {
    it('is not visible on folders', () => {
        const [name, contents, bucket] = ['test', ['test.py'], 'test-bucket'];
        const dir = new BucketDirectory(name, contents, bucket);
-       const {getByText, queryByLabelText} = render(<CollabSpaceEntry tag={'div'} metadata={dir}/>);
+       const {getByText, queryByLabelText} = render(<CollabSpaceEntry onContextFinish={() => {}} tag={'div'} metadata={dir}/>);
        const renderedDir = getByText(name);
        fireEvent.contextMenu(renderedDir);
        // should not open a context menu
@@ -58,7 +58,7 @@ describe('Test ContextMenu', () => {
    it('is visible on files', () => {
        const [name, absolutePath, bucket] = ['test.py', 'test.py', 'test-bucket'];
        const bucketFile = new BucketFile(name, absolutePath, bucket);
-       const {getByText, queryByLabelText} = render(<BucketContextProvider><CollabSpaceEntry tag={'div'} metadata={bucketFile}/></BucketContextProvider>);
+       const {getByText, queryByLabelText} = render(<BucketContextProvider><CollabSpaceEntry onContextFinish={() => {}} tag={'div'} metadata={bucketFile}/></BucketContextProvider>);
        const renderedFile = getByText(name);
        fireEvent.contextMenu(renderedFile);
        const contextMenu = queryByLabelText('context-menu');
@@ -68,7 +68,7 @@ describe('Test ContextMenu', () => {
    it('provides download mechanism', async () => {
       const [name, absolutePath, bucket] = ['test.py', 'test.py', 'test-bucket'];
       const bucketFile = new BucketFile(name, absolutePath, bucket);
-      const {getByText, queryByLabelText} = render(<BucketContextProvider><CollabSpaceEntry tag={'div'} metadata={bucketFile}/></BucketContextProvider>);
+      const {getByText, queryByLabelText} = render(<BucketContextProvider><CollabSpaceEntry onContextFinish={() => {}} tag={'div'} metadata={bucketFile}/></BucketContextProvider>);
       const renderedFile = getByText(name);
       fireEvent.contextMenu(renderedFile);
       const contextMenu = queryByLabelText('context-menu');

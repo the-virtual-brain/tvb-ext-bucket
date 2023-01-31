@@ -6,6 +6,7 @@ import { Dialog, showDialog, showErrorMessage } from '@jupyterlab/apputils';
 
 export const ContextMenu: React.FC<ContextMenuNamespace.IProps> = ({
   name,
+  onContextFinish,
   children
 }): JSX.Element => {
   const [show, setShow] = useState<boolean>(false);
@@ -44,7 +45,7 @@ export const ContextMenu: React.FC<ContextMenuNamespace.IProps> = ({
       const url = await file.getDownloadUrl();
       const anchor = document.createElement('a');
       anchor.href = url;
-      anchor.download = '';
+      anchor.download = name;
       document.body.appendChild(anchor);
       anchor.click();
       document.body.removeChild(anchor);
@@ -105,6 +106,7 @@ export const ContextMenu: React.FC<ContextMenuNamespace.IProps> = ({
             label={'Delete'}
             action={deleteFile}
             icon={deleteIcon}
+            onContextFinish={onContextFinish}
           />
         </ul>
       </div>
@@ -115,5 +117,6 @@ export const ContextMenu: React.FC<ContextMenuNamespace.IProps> = ({
 export namespace ContextMenuNamespace {
   export interface IProps {
     name: string;
+    onContextFinish: () => void;
   }
 }

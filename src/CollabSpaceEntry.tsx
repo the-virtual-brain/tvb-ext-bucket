@@ -8,7 +8,8 @@ import BucketFile = BucketFileBrowser.BucketFile;
 export function CollabSpaceEntry({
   tag,
   metadata,
-  onClick
+  onClick,
+  onContextFinish
 }: CollabSpaceEntry.IProps): JSX.Element {
   return (
     <Private.Wrapper tag={tag}>
@@ -27,7 +28,7 @@ export function CollabSpaceEntry({
       )}
       {/* Add context menu only to files */}
       {metadata.isFile ? (
-        <ContextMenu name={metadata.name}>
+        <ContextMenu name={metadata.name} onContextFinish={onContextFinish}>
           <DragDownload file={metadata as BucketFile}>
             <p onClick={onClick} style={{ cursor: 'pointer' }}>
               {metadata.name}
@@ -48,6 +49,7 @@ export namespace CollabSpaceEntry {
     tag: 'li' | 'div';
     metadata: BucketFileBrowser.IBrowserEntry;
     onClick?: () => void;
+    onContextFinish: () => void;
   }
 }
 

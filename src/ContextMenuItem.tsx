@@ -4,12 +4,14 @@ import { LabIcon } from '@jupyterlab/ui-components';
 export const ContextMenuItem: React.FC<ContextMenuItem.IProps> = ({
   label,
   action,
-  icon
+  icon,
+  onContextFinish
 }): JSX.Element => {
   const [loading, setLoading] = useState<boolean>(false);
   const handleAction = useCallback(async () => {
     setLoading(true);
     await action();
+    onContextFinish && onContextFinish();
     setLoading(false);
   }, []);
 
@@ -33,5 +35,6 @@ export namespace ContextMenuItem {
     label: string;
     action: Func | AsyncFunc;
     icon?: LabIcon;
+    onContextFinish?: () => void;
   }
 }

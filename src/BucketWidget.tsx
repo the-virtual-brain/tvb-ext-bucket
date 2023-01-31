@@ -42,7 +42,11 @@ export const BucketSpace = (): JSX.Element => {
   return (
     <>
       <div>
-        <div className={'collab-logo'} />
+        <div className={'bucket-logo'}>
+          <span className={'collab-logo'} />
+          <span className={'bucket-logo-text'}>Bucket</span>
+        </div>
+
         <input
           type={'text'}
           value={bucketName}
@@ -91,6 +95,7 @@ export const BucketSpace = (): JSX.Element => {
               metadata={bucketEntry}
               key={bucketEntry.name}
               onClick={onClick}
+              onContextFinish={getBucket}
             />
           );
         })}

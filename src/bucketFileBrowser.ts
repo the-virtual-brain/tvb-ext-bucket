@@ -362,7 +362,9 @@ export namespace BucketFileBrowser {
     async delete(): Promise<IDeleteResponse | void> {
       try {
         const response = await requestAPI<IDeleteResponse>(
-          `objects/${this.bucket}/${this.absolutePath}`,
+          `objects/${encodeURIComponent(this.bucket)}/${encodeURIComponent(
+            this.absolutePath
+          )}`,
           { method: 'DELETE' }
         );
         return response;

@@ -119,9 +119,25 @@
 }
 
 .collab-logo {
-  background-image: url(Collaboratory_EBRAINS.svg);
+  display: inline-block;
+  background-image: url(Collaboratory_bucket_simple.png);
   background-repeat: no-repeat;
+  background-size: contain;
   height: 40px;
+  width: 30px;
+  margin-left: 1em;
+}
+
+.bucket-logo {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.bucket-logo-text {
+  margin-left: 0.2em;
+  font-size: 1.2em;
+  display: inline-block;
 }
 
 .bucket-CollabLogo {
