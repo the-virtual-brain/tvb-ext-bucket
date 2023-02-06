@@ -247,3 +247,19 @@
   color: var(--bucket-text-info-color);
   font-style: italic;
 }
+
+.bucket-Tooltip {
+  position: absolute;
+  top: 5vh;
+  z-index: 99;
+  width: 100%;
+  height: 4em;
+  background-color: var(--jp-layout-color1);
+  border-radius: 7px;
+  box-shadow: var(--jp-elevation-z6);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5em;
+}

@@ -7,6 +7,7 @@ import { Dialog, showDialog, showErrorMessage } from '@jupyterlab/apputils';
 export const ContextMenu: React.FC<ContextMenuNamespace.IProps> = ({
   name,
   onContextFinish,
+  renameAction,
   children
 }): JSX.Element => {
   const [show, setShow] = useState<boolean>(false);
@@ -108,6 +109,13 @@ export const ContextMenu: React.FC<ContextMenuNamespace.IProps> = ({
             icon={deleteIcon}
             onContextFinish={onContextFinish}
           />
+          <ContextMenuItem
+            label={'Rename'}
+            action={() => {
+              renameAction();
+              setShow(false);
+            }}
+          />
         </ul>
       </div>
     </div>
@@ -118,5 +126,6 @@ export namespace ContextMenuNamespace {
   export interface IProps {
     name: string;
     onContextFinish: () => void;
+    renameAction: () => void;
   }
 }

@@ -6,6 +6,7 @@ import {
 } from './exceptions';
 import { Dialog, showDialog, showErrorMessage } from '@jupyterlab/apputils';
 import { JpFileBrowser } from './JpFileBrowser';
+import { getExtension } from './utils';
 
 export class BucketFileBrowser {
   private _bucket: string;
@@ -286,9 +287,9 @@ export namespace BucketFileBrowser {
   }
 
   export class BucketFile implements IBrowserEntry {
-    public readonly name: string;
+    private _name: string;
     public readonly bucket: string;
-    public readonly absolutePath: string;
+    private _absolutePath: string;
 
     public readonly isFile: boolean = true;
 
@@ -299,10 +300,18 @@ export namespace BucketFileBrowser {
      * @param bucket - bucket name as string
      */
     constructor(name: string, absolutePath: string, bucket: string) {
-      this.name = name;
+      this._name = name;
       this.bucket = bucket;
-      this.absolutePath = absolutePath;
+      this._absolutePath = absolutePath;
       this._validate();
+    }
+
+    public get name(): string {
+      return this._name;
+    }
+
+    public get absolutePath(): string {
+      return this._absolutePath;
     }
 
     /**
@@ -361,16 +370,46 @@ export namespace BucketFileBrowser {
      */
     async delete(): Promise<IDeleteResponse | void> {
       try {
-        const response = await requestAPI<IDeleteResponse>(
+        return await requestAPI<IDeleteResponse>(
           `objects/${encodeURIComponent(this.bucket)}/${encodeURIComponent(
             this.absolutePath
           )}`,
           { method: 'DELETE' }
         );
-        return response;
       } catch (e) {
         await showErrorMessage('Failed', e);
       }
+    }
+
+    /**
+     * method to rename this file
+     * @param newName
+     */
+    async rename(newName: string): Promise<void> {
+      if (getExtension(newName) !== getExtension(this.name)) {
+        const confirm = await showDialog({
+          title: 'Warning!',
+          body: 'If you change the file extension, the file might become unusable!',
+          buttons: [
+            Dialog.cancelButton({ label: 'Cancel' }),
+            Dialog.okButton({ label: 'Continue' })
+          ]
+        });
+
+        if (!confirm.button.accept) {
+          return;
+        }
+      }
+      const response = await requestAPI<IRenameResponse>(
+        `rename?path=${encodeURIComponent(
+          this.absolutePath
+        )}&new_name=${newName}&bucket=${encodeURIComponent(this.bucket)}`
+      );
+      if (!response.success) {
+        throw new Error(`Could not rename file ${this.name} to ${newName}!`);
+      }
+      this._name = response.newData.name;
+      this._absolutePath = response.newData.path;
     }
 
     private _validate(): void {
@@ -396,4 +435,15 @@ export namespace BucketFileBrowser {
     success: boolean;
     message: string;
   }
+
+  export interface IRenameResponse {
+    success: boolean;
+    message: string;
+    newData: fileInfo;
+  }
+
+  type fileInfo = {
+    name: string;
+    path: string;
+  };
 }

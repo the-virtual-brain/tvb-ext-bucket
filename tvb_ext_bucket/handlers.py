@@ -159,6 +159,30 @@ class ObjectsHandler(APIHandler):
         self.finish(json.dumps(delete_response))
 
 
+class RenameHandler(APIHandler):
+    def get(self):
+        response = {
+            'success': False,
+            'message': '',
+            'newData': {}
+        }
+        try:
+            bucket = self.get_argument('bucket')
+            file_path = self.get_argument('path')
+            new_name = self.get_argument('new_name')
+            wrapper = BucketWrapper()
+            new_data = wrapper.rename_file(bucket, file_path, new_name)
+            response['success'] = True
+            response['newData'] = new_data
+        except MissingArgumentError as e:
+            response['message'] = str(e)
+        if not response['success']:
+            self.set_status(400)
+            self.finish(json.dumps(response))
+        else:
+            self.finish(json.dumps(response))
+
+
 def setup_handlers(web_app):
     host_pattern = ".*$"
 
@@ -169,6 +193,7 @@ def setup_handlers(web_app):
     upload_pattern = url_path_join(base_url, "tvb_ext_bucket", "upload")
     local_upload_pattern = url_path_join(base_url, "tvb_ext_bucket", "local_upload")
     objects_handler = url_path_join(base_url, "tvb_ext_bucket", r"objects/(.*)/(.*)")
+    rename_handler_pattern = url_path_join(base_url, "tvb_ext_bucket", "rename")
 
     handlers = [
         (bucket_pattern, BucketsHandler),
@@ -176,6 +201,7 @@ def setup_handlers(web_app):
         (download_ulr_pattern, DownloadUrlHandler),
         (upload_pattern, UploadHandler),
         (local_upload_pattern, LocalUploadHandler),
-        (objects_handler, ObjectsHandler)
+        (objects_handler, ObjectsHandler),
+        (rename_handler_pattern, RenameHandler)
     ]
     web_app.add_handlers(host_pattern, handlers)

@@ -6,6 +6,7 @@ import React from "react";
 import BucketFile = BucketFileBrowser.BucketFile;
 import { BucketContextProvider } from "../BucketContext";
 import {showErrorMessage} from "@jupyterlab/apputils";
+import { BucketSpace } from "../BucketWidget";
 
 jest.mock('../handler', () => {
   return {
@@ -43,11 +44,15 @@ jest.mock('@jupyterlab/apputils', () => {
     }
 });
 
+const onContextFinish = jest.fn().mockImplementation(() => {});
+
 describe('Test ContextMenu', () => {
    it('is not visible on folders', () => {
        const [name, contents, bucket] = ['test', ['test.py'], 'test-bucket'];
        const dir = new BucketDirectory(name, contents, bucket);
-       const {getByText, queryByLabelText} = render(<CollabSpaceEntry onContextFinish={() => {}} tag={'div'} metadata={dir}/>);
+       const {getByText, queryByLabelText} = render(
+           <CollabSpaceEntry onContextFinish={() => {}} tag={'div'} metadata={dir}/>
+       );
        const renderedDir = getByText(name);
        fireEvent.contextMenu(renderedDir);
        // should not open a context menu
@@ -56,27 +61,39 @@ describe('Test ContextMenu', () => {
    });
 
    it('is visible on files', () => {
-       const [name, absolutePath, bucket] = ['test.py', 'test.py', 'test-bucket'];
+       const [name, absolutePath, bucket] = ['test.py', 'a/test.py', 'test-bucket'];
        const bucketFile = new BucketFile(name, absolutePath, bucket);
-       const {getByText, queryByLabelText} = render(<BucketContextProvider><CollabSpaceEntry onContextFinish={() => {}} tag={'div'} metadata={bucketFile}/></BucketContextProvider>);
+       const {getByText, queryByLabelText} = render(
+           <BucketContextProvider>
+               <CollabSpaceEntry onContextFinish={onContextFinish} tag={'div'} metadata={bucketFile}/>
+           </BucketContextProvider>
+       );
        const renderedFile = getByText(name);
        fireEvent.contextMenu(renderedFile);
        const contextMenu = queryByLabelText('context-menu');
        expect(contextMenu).toBeTruthy();
+       expect(onContextFinish).toBeCalledTimes(0);
    });
 
-   it('provides download mechanism', async () => {
+   it('provides download mechanism and error if not in a bucket', async () => {
       const [name, absolutePath, bucket] = ['test.py', 'test.py', 'test-bucket'];
       const bucketFile = new BucketFile(name, absolutePath, bucket);
-      const {getByText, queryByLabelText} = render(<BucketContextProvider><CollabSpaceEntry onContextFinish={() => {}} tag={'div'} metadata={bucketFile}/></BucketContextProvider>);
+      const {getByText, queryByLabelText} = render(
+          <BucketContextProvider>
+              <CollabSpaceEntry onContextFinish={() => {}} tag={'div'} metadata={bucketFile}/>
+          </BucketContextProvider>
+      );
       const renderedFile = getByText(name);
       fireEvent.contextMenu(renderedFile);
       const contextMenu = queryByLabelText('context-menu');
       expect(contextMenu).toBeTruthy();
       // search for download
-       const downloadBtn = getByText('Download');
-       await waitFor(()=>fireEvent.click(downloadBtn));
-       expect(showErrorMessage).toBeCalled(); // file is not in a directory of the browser
+      const downloadBtn = getByText('Download');
+      await waitFor(()=>fireEvent.click(downloadBtn));
+      expect(showErrorMessage).toBeCalled(); // file is not in a directory of the browser
    });
 
+   it('calls the download method when clicking on download', () => {
+       render(<BucketContextProvider><BucketSpace/></BucketContextProvider>);
+   });
 });

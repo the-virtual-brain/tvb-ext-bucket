@@ -4,7 +4,7 @@
 #
 # (c) 2022-2023, TVB Widgets Team
 #
-
+import requests
 from ebrains_drive import BucketApiClient
 from ebrains_drive.bucket import Bucket
 from ebrains_drive.files import DataproxyFile
@@ -183,3 +183,13 @@ class BucketWrapper:
         except (Unauthorized, AssertionError) as e:
             resp['message'] = str(e)
         return resp
+
+    def rename_file(self, bucket_name: str, file_path: str, new_name: str):
+        dataproxy_file = self._get_dataproxy_file(file_path, bucket_name)
+        dir_path = '/'.join(file_path.split('/')[:-1])
+        file_data = dataproxy_file.get_content()
+        upload_url = self.get_bucket_upload_url(bucket_name, new_name, dir_path)
+        resp = requests.request('PUT', upload_url, data=file_data)
+        resp.raise_for_status()
+        dataproxy_file.delete()
+        return {'name': new_name, 'path': dir_path + '/' + new_name}
