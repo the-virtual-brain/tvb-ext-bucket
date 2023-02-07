@@ -1,5 +1,10 @@
 import React, { useCallback, useState, useEffect } from 'react';
-import { downloadIcon, deleteIcon } from '@jupyterlab/ui-components';
+import {
+  downloadIcon,
+  editIcon,
+  closeIcon,
+  linkIcon
+} from '@jupyterlab/ui-components';
 import { ContextMenuItem } from './ContextMenuItem';
 import { useBucketContext } from './BucketContext';
 import { Dialog, showDialog, showErrorMessage } from '@jupyterlab/apputils';
@@ -80,6 +85,38 @@ export const ContextMenu: React.FC<ContextMenuNamespace.IProps> = ({
     }
   }, [name]);
 
+  const getShareLink = useCallback(async () => {
+    let shareLink = '';
+    try {
+      const bucketFile = browser.currentDirectory?.files.get(name);
+      if (!bucketFile) {
+        await showErrorMessage(
+          'ERROR',
+          `Could not get details on file ${name}. Please refresh and try again!`
+        );
+        return;
+      }
+      shareLink = await bucketFile.getDownloadUrl();
+      await showDialog({
+        title: 'Your share URL:',
+        body: (
+          <>
+            <a href={shareLink} className={'bucket-ShareLink'}>
+              {shareLink}
+            </a>
+            <p>Copy and paste this url in a browser to download the file!</p>
+            <p style={{ color: 'red' }}>
+              * If this bucket is private this link will expire very soon.
+            </p>
+          </>
+        ),
+        buttons: [Dialog.okButton({ label: 'Close' })]
+      });
+    } catch (e) {
+      await showErrorMessage('ERROR', e);
+    }
+  }, [name]);
+
   return (
     <div
       onContextMenu={handleContext}
@@ -106,7 +143,7 @@ export const ContextMenu: React.FC<ContextMenuNamespace.IProps> = ({
           <ContextMenuItem
             label={'Delete'}
             action={deleteFile}
-            icon={deleteIcon}
+            icon={closeIcon}
             onContextFinish={onContextFinish}
           />
           <ContextMenuItem
@@ -115,6 +152,12 @@ export const ContextMenu: React.FC<ContextMenuNamespace.IProps> = ({
               renameAction();
               setShow(false);
             }}
+            icon={editIcon}
+          />
+          <ContextMenuItem
+            label={'Share download url'}
+            action={getShareLink}
+            icon={linkIcon}
           />
         </ul>
       </div>

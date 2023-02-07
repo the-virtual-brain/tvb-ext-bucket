@@ -17,7 +17,7 @@ export const useToolTip = ({
     display: visible ? 'flex' : 'none'
   };
 
-  const ToolTip = (): JSX.Element => (
+  const ToolTip: React.FC = (): JSX.Element => (
     <div style={style} className={'bucket-Tooltip'}>
       {hasLoader && <span className={'bucket-Spinner'} />}
       <p>{message}</p>

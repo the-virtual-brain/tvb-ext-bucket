@@ -18,10 +18,12 @@ export const ContextMenuItem: React.FC<ContextMenuItem.IProps> = ({
   return (
     <li onClick={handleAction} className={'bucket-ContextMenu-item'}>
       {icon && <icon.react />}
-      <p>{label}</p>
+      <p style={{ paddingLeft: '0.5em' }}>{label}</p>
       <span
         className={'bucket-Spinner'}
-        style={{ display: loading ? 'inline-block' : 'none' }}
+        style={{
+          display: loading ? 'inline-block' : 'none'
+        }}
       ></span>
     </li>
   );
