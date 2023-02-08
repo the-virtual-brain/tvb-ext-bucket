@@ -88,7 +88,11 @@ export function CollabSpaceEntry({
           <ToolTip />
           <DragDownload file={metadata as BucketFile}>
             {renameActive ? (
-              <input defaultValue={metadata.name} ref={nameInputRef} />
+              <input
+                aria-label={'rename-input'}
+                defaultValue={metadata.name}
+                ref={nameInputRef}
+              />
             ) : (
               <p onClick={onClick}>{metadata.name}</p>
             )}

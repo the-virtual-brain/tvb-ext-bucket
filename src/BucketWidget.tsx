@@ -51,6 +51,7 @@ export const BucketSpace = (): JSX.Element => {
           type={'text'}
           value={bucketName}
           aria-label={'bucket-name-input'}
+          placeholder={'bucket-name'}
           onChange={ev => setBucketName(ev.target.value)}
         />
         <button onClick={getBucket}>Connect!</button>
