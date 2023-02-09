@@ -28,6 +28,8 @@ export const DropZone: React.FC<DropZone.IProps> = ({
     uploadingRef.current = uploading;
   }, [uploading]);
 
+  // const dragRef = useRef<Drag | null>(null);
+
   const dropZoneRef = useRef<HTMLDivElement>(null);
 
   const bucketBrowser = useBucketContext().fileBrowser;
@@ -44,6 +46,10 @@ export const DropZone: React.FC<DropZone.IProps> = ({
    * event with data about the file
    */
   const handleJpBrowserDragStart = useCallback((ev: MouseEvent) => {
+    // if right click don't start drag
+    if (ev.button === 2) {
+      return;
+    }
     const dragSourceElement: HTMLElement | null = ev.target as HTMLElement;
     const possibleTargets = JpFileBrowser.current?.selectedItems();
 

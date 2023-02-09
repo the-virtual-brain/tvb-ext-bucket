@@ -7,11 +7,12 @@
 import os
 import uuid
 import tempfile
+import shutil
 
 import pytest
 
 from tvb_ext_bucket.ebrains_drive_wrapper import BucketWrapper
-from tvb_ext_bucket.exceptions import CollabAccessError
+from tvb_ext_bucket.exceptions import CollabAccessError, DataproxyFileNotFound
 from ebrains_drive.exceptions import Unauthorized
 
 
@@ -19,6 +20,12 @@ class MockFile:
     def __init__(self, name):
         # type: (str) -> None
         self.name = name
+
+    def get_content(self):
+        return b'test content'
+
+    def get_download_link(self):
+        return f'{self.name}'
 
 
 class MockBucket:
@@ -72,6 +79,12 @@ def temp_txt_file(tmp_path_factory):
     return base
 
 
+@pytest.fixture(scope="session")
+def temp_directory(tmp_path_factory):
+    base = tmp_path_factory.mktemp("temp_downloads")
+    return base
+
+
 def test_get_files_in_bucket(mock_client):
     """
     tests that client returns list of files from bucket
@@ -83,7 +96,7 @@ def test_get_files_in_bucket(mock_client):
 def test_raises_error_if_source_file_does_not_exist(mock_client):
     try:
         temp_dir = tempfile.mkdtemp()
-        non_existent_file = 'test.txt'
+        non_existent_file = 'test.test'
         source = os.path.join(temp_dir, non_existent_file)
         dest_path = '/'
         bucket = 'test_bucket'
@@ -124,3 +137,38 @@ def test_upload_fails_from_server(temp_txt_file, mock_client):
     file_name = 'err'  # triggers the error from the mock obj
     resp = client.upload_file_to(source_path, bucket, dest_path, file_name)
     assert resp is False
+
+
+def test_download_file_fail_as_file_is_not_in_bucket(temp_directory, mock_client):
+    temp_location = temp_directory
+    client = BucketWrapper()
+    file_path = 'test.txt'
+    bucket_name = 'test_bucket'
+    resp = client.download_file(file_path, bucket_name, temp_location.name)
+    assert resp is False
+
+
+def test_download_file_success(temp_directory, mock_client):
+    temp_location = tempfile.mkdtemp()
+    client = BucketWrapper()
+    file_path = 'file1'
+    bucket_name = 'test_bucket'
+    resp = client.download_file(file_path, bucket_name, temp_location)
+    shutil.rmtree(temp_location)
+    assert resp is True
+
+
+def test_get_download_url_fail(mock_client):
+    client = BucketWrapper()
+    nonexistent_file = 'nonexistent.asd'
+    url = None
+    with pytest.raises(DataproxyFileNotFound):
+        url = client.get_download_url(nonexistent_file, 'test_bucket')
+    assert url is None
+
+
+def test_get_download_url_success(mock_client):
+    client = BucketWrapper()
+    existent_file = 'file1'
+    url = client.get_download_url(existent_file, 'test_bucket')
+    assert url == existent_file
