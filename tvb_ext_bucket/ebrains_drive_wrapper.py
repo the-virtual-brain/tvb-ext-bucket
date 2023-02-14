@@ -4,6 +4,7 @@
 #
 # (c) 2022-2023, TVB Widgets Team
 #
+import ebrains_drive.exceptions
 import requests
 from ebrains_drive import BucketApiClient
 from ebrains_drive.bucket import Bucket
@@ -14,7 +15,6 @@ from ebrains_drive.exceptions import Unauthorized
 from tvb_ext_bucket.logger.builder import get_logger
 from tvb_ext_bucket.exceptions import CollabTokenError, CollabAccessError, DataproxyFileNotFound
 import os
-
 
 LOGGER = get_logger(__name__)
 
@@ -62,8 +62,14 @@ class BucketWrapper:
             bucket = self.client.buckets.get_bucket(bucket_name)
             LOGGER.info('Bucket retrieved successfully.')
         except Unauthorized as e:
-            LOGGER.error(f'Could not access bucket {bucket_name} due to {e}')
-            raise CollabAccessError(e)
+            error_msg = f'Could not access bucket {bucket_name} due to {str(e)}. Your access might be limited!'
+            LOGGER.error(error_msg)
+            raise CollabAccessError(error_msg)
+        except ebrains_drive.exceptions.ClientHttpError as e:
+            error_msg = f'Cant get client for bucket {bucket_name}. ' \
+                        f'Bucket might not exist or your access is limited! {e.message}. '
+            LOGGER.error(error_msg)
+            raise CollabAccessError(error_msg)
         return bucket
 
     def _get_dataproxy_file(self, file_path, bucket_name):
@@ -100,12 +106,14 @@ class BucketWrapper:
         try:
             token = get_collab_token()
         except Exception as e:
-            LOGGER.error(f'Failed to get token: {e}')
-            LOGGER.info(f'Retrying to get token from environment variable {TOKEN_ENV_VAR}...')
+            LOGGER.warning(f"Could not connect to EBRAINS to retrieve an auth token: {e}")
+            LOGGER.info(f'"Will try to use the auth token defined by environment variable {TOKEN_ENV_VAR}...')
             token = os.environ.get(TOKEN_ENV_VAR)
-            LOGGER.info('Token retrieved successfully!')
         if not token:
-            raise CollabTokenError('Failed to connect to EBRAINS! Could not find token!')
+            LOGGER.error(f"No auth token defined as environment variable {TOKEN_ENV_VAR}! Please define one!")
+            raise CollabTokenError(f"Cannot connect to EBRAINS HPC without an auth token! Either run this on "
+                                   f"Collab, or define the {TOKEN_ENV_VAR} environment variable!")
+        LOGGER.info('Token retrieved successfully!')
         return BucketApiClient(token=token)
 
     def download_file(self, file_path, bucket_name, location):

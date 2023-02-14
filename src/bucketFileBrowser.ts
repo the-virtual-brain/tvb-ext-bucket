@@ -74,11 +74,18 @@ export class BucketFileBrowser {
     // make sure the current file set is empty before populating
     this._currentFiles.clear();
     this._breadcrumbs = []; // current path is '/'
-    const bucketStructureResponse =
-      await requestAPI<BucketFileBrowser.IBucketStructureResponse>(
-        `${this._bucketEndpoint}?bucket=${this._bucket}`
-      );
-    this._buildBrowser(bucketStructureResponse.files);
+    try {
+      const bucketStructureResponse =
+        await requestAPI<BucketFileBrowser.IBucketStructureResponse>(
+          `${this._bucketEndpoint}?bucket=${this._bucket}`
+        );
+      if (!bucketStructureResponse.success) {
+        await showErrorMessage('ERROR', bucketStructureResponse.message);
+      }
+      this._buildBrowser(bucketStructureResponse.files);
+    } catch (e) {
+      await showErrorMessage('ERROR', `Could not open bucket. ${e}`);
+    }
 
     return this.currentDirectory;
   }
@@ -137,6 +144,7 @@ export namespace BucketFileBrowser {
   }
 
   export interface IBucketStructureResponse {
+    success: boolean;
     message: string;
     files: Array<string>;
   }
@@ -257,6 +265,10 @@ export namespace BucketFileBrowser {
      * @param filename name of the file after upload
      */
     async upload(fileSource: string, filename: string): Promise<void> {
+      const allowUpload = await this._confirmOverride(filename);
+      if (!allowUpload) {
+        return;
+      }
       const result = requestAPI(
         `upload?source_file=${fileSource}&bucket=${this.bucket}&destination=${this.absolutePath}&filename=${filename}`
       );
@@ -266,13 +278,17 @@ export namespace BucketFileBrowser {
     /**
      * Get an upload URL for a file to this directory in the same bucket as this directory
      * Note: to upload the file make a PUT request with a bytes stream to the URL returned by this method
-     * @param fileName
+     * @param filename
      */
-    async getUploadUrl(fileName: string): Promise<string> {
+    async getUploadUrl(filename: string): Promise<string> {
+      const allowUpload = await this._confirmOverride(filename);
+      if (!allowUpload) {
+        return '#';
+      }
       const uploadUrlResponse = await requestAPI<INativeUploadResponse>(
         `local_upload?to_bucket=${
           this.bucket
-        }&with_name=${fileName}&to_path=${encodeURIComponent(
+        }&with_name=${filename}&to_path=${encodeURIComponent(
           this.absolutePath
         )}`
       );
@@ -283,6 +299,29 @@ export namespace BucketFileBrowser {
         );
       }
       return uploadUrlResponse.url;
+    }
+
+    /**
+     * Checks if a file with the provided <filename> already exists in this directory
+     * and prompts the user if it should be replaced. Returns true if it should be replaced
+     * and false otherwise
+     * @param filename
+     * @private
+     */
+    private async _confirmOverride(filename: string): Promise<boolean> {
+      if (!this.files.get(filename)) {
+        return true;
+      }
+      const confirm = await showDialog({
+        title: 'Warning!',
+        body: 'A file with this name already exists in this directory. If you continue it will be overwritten!',
+        buttons: [
+          Dialog.cancelButton({ label: 'Cancel' }),
+          Dialog.okButton({ label: 'Continue' })
+        ]
+      });
+
+      return confirm.button.accept;
     }
   }
 
