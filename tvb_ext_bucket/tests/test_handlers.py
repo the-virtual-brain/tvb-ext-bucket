@@ -17,6 +17,7 @@ async def test_get_example(jp_fetch, mock_client):
     assert response.code == 200
     payload = json.loads(response.body)
     assert payload == {
+        'success': False,
         "message": "No collab name provided!",
         "files": []
     }
