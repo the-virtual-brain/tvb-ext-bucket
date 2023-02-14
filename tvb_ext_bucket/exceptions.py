@@ -25,3 +25,9 @@ class CollabAccessError(TVBExtBucketException):
     """
     Exception to be thrown when connection to a bucket is not possible
     """
+
+
+class DataproxyFileNotFound(TVBExtBucketException):
+    """
+    Exception to be thrown when a DataproxyFile can't be found in a bucket
+    """

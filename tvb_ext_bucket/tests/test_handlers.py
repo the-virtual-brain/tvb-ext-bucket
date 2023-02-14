@@ -6,9 +6,10 @@
 #
 
 import json
+from tvb_ext_bucket.tests.test_drive_wrapper import mock_client
 
 
-async def test_get_example(jp_fetch):
+async def test_get_example(jp_fetch, mock_client):
     # When
     response = await jp_fetch("tvb_ext_bucket", "buckets")
 
@@ -16,6 +17,7 @@ async def test_get_example(jp_fetch):
     assert response.code == 200
     payload = json.loads(response.body)
     assert payload == {
+        'success': False,
         "message": "No collab name provided!",
         "files": []
     }
