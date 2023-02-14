@@ -15,6 +15,7 @@ jest.mock('../handler', () => {
 });
 
 const filesData = {
+    success: true,
     message: 'test',
     files: ['file1.txt', 'file2.txt', 'dir1/dir2/file1.py']
 }
