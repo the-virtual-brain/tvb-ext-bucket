@@ -27,6 +27,12 @@ class CollabAccessError(TVBExtBucketException):
     """
 
 
+class BucketDTOError(TVBExtBucketException):
+    """
+    Exception on bucket DTOs
+    """
+
+
 class DataproxyFileNotFound(TVBExtBucketException):
     """
     Exception to be thrown when a DataproxyFile can't be found in a bucket

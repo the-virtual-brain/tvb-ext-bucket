@@ -6,15 +6,16 @@
 #
 import ebrains_drive.exceptions
 import requests
-from ebrains_drive import BucketApiClient
-from ebrains_drive.bucket import Bucket
-from ebrains_drive.files import DataproxyFile
 
+from ebrains_drive.files import DataproxyFile
 from ebrains_drive.exceptions import Unauthorized
 
 from tvb_ext_bucket.logger.builder import get_logger
 from tvb_ext_bucket.exceptions import CollabTokenError, CollabAccessError, DataproxyFileNotFound
 import os
+
+from tvb_ext_bucket.bucket_api.bucket_api import BucketApiClient
+from tvb_ext_bucket.bucket_api.bucket import Bucket
 
 LOGGER = get_logger(__name__)
 
@@ -77,6 +78,7 @@ class BucketWrapper:
         """
         Get the DataProxy file corresponding to the path <file_path> in bucket <bucket_name>
         """
+        file_path = file_path.lstrip('/')
         bucket = self._get_bucket(bucket_name)
         # find first dataproxy file corresponding to provided path
         dataproxy_file = next((f for f in bucket.ls() if f.name == file_path), None)
@@ -186,9 +188,11 @@ class BucketWrapper:
         dataproxy_file = self._get_dataproxy_file(file_path, bucket_name)
         resp = {'success': False, 'message': ''}
         try:
+            LOGGER.warning(f'Deleting file {file_path}')
             dataproxy_file.delete()
             resp = {'success': True, 'message': f'File {file_path} was deleted from bucket {bucket_name}'}
         except (Unauthorized, AssertionError) as e:
+            LOGGER.error(f'Something went wrong trying to delete file. Error: {e}')
             resp['message'] = str(e)
         return resp
 
