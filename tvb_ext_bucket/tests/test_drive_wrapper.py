@@ -29,9 +29,11 @@ class MockFile:
 
 
 class MockBucket:
-    def __init__(self, files_count=2, name='test_bucket'):
+    def __init__(self, files_count=2, name='test_bucket', target='buckets', dataproxy_entity_name='test_bucket'):
         self.name = name
         self.files = [MockFile(f'file{number}') for number in range(files_count)]
+        self.target = target
+        self.dataproxy_entity_name = dataproxy_entity_name
 
     def ls(self, prefix=''):
         return [f for f in self.files if f.name.startswith(prefix)]
