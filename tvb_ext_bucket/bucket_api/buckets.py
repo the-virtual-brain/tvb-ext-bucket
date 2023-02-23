@@ -9,20 +9,6 @@ from typing import List
 
 LOGGER = get_logger(__name__)
 
-# mapping between how a param is called in json response from api and how it is called as an
-# argument in the  __init_ of bucket. This is needed since there is the possibility of some keys in the
-# json response to be named as some reserved python names (e.g. bytes)
-# format is <json_response_key>: <actual_bucket_param_name>
-BUCKET_PARAMS_MAP = {
-    'name': 'name',
-    'objects_count': 'objects_count',
-    'bytes': 'bytes_count',
-    'last_modified': 'last_modified',
-    'is_public': 'is_public',
-    'role': 'role',
-    'is_initialized': 'is_initialized'
-}
-
 
 @dataclass
 class BucketDTO:
@@ -47,8 +33,7 @@ class Buckets:
         """
         LOGGER.info(f'Trying to retrieve bucket {bucket_name}. (Public: {public})')
         resp = self.client.get(f"{self.BUCKETS_ENDPOINT}/{bucket_name}/stat")
-        params = self._sanitize_bucket_params(resp.json())
-        return Bucket.from_json(self.client, params, public=public, target=Endpoint.BUCKETS)
+        return Bucket.from_json(self.client, resp.json(), public=public, target=Endpoint.BUCKETS)
 
     def get_dataset(self, dataset_id: str, *, public: bool = False, request_access: bool = False):
         request_sent = False
@@ -101,13 +86,3 @@ class Buckets:
             if bucket.name == bucket_name:
                 return True
         return False
-
-    def _sanitize_bucket_params(self, params_dict):
-        # type: (dict) -> dict
-        sanitized = dict()
-        for k, v in BUCKET_PARAMS_MAP.items():
-            try:
-                sanitized[v] = params_dict[k]
-            except KeyError:
-                pass
-        return sanitized

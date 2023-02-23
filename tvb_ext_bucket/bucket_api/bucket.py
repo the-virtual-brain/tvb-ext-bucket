@@ -6,8 +6,21 @@ from tvb_ext_bucket.bucket_api.dataproxy_file import DataproxyFile
 from ebrains_drive.utils import on_401_raise_unauthorized
 from tvb_ext_bucket.logger.builder import get_logger
 
-
 LOGGER = get_logger(__name__)
+
+# mapping between how a param is called in json response from api and how it is called as an
+# argument in the  __init_ of bucket. This is needed since there is the possibility of some keys in the
+# json response to be named as some reserved python names (e.g. bytes)
+# format is <json_response_key>: <actual_bucket_param_name>
+BUCKET_PARAMS_MAP = {
+    'name': 'name',
+    'objects_count': 'objects_count',
+    'bytes': 'bytes_count',
+    'last_modified': 'last_modified',
+    'is_public': 'is_public',
+    'role': 'role',
+    'is_initialized': 'is_initialized'
+}
 
 
 class Endpoint(str, enum.Enum):
@@ -22,6 +35,8 @@ class Bucket:
     """
     A dataproxy bucket
     n.b. for a dataset bucket, role & is_public may be None
+
+    n.b.2 Duplicates functionality in ebrains-drive package
     """
     # max entries in a response
     LIMIT = 100
@@ -59,7 +74,8 @@ class Bucket:
     @classmethod
     def from_json(cls, client, bucket_json, *, public: bool = False, target: Endpoint = Endpoint.BUCKETS,
                   dataset_id=None) -> 'Bucket':
-        return cls(client, **bucket_json, public=public, target=target, dataset_id=dataset_id)
+        params = cls._parse_json_to_params(bucket_json)
+        return cls(client, **params, public=public, target=target, dataset_id=dataset_id)
 
     def __str__(self):
         return "(name='{}')".format(self.name)
@@ -68,8 +84,15 @@ class Bucket:
         return "Bucket(name='{}')".format(self.name)
 
     @on_401_raise_unauthorized("Unauthorized.")
-    def ls(self, prefix: str = None) -> Iterable[DataproxyFile]:
-        marker = None
+    def ls(self, prefix=None):
+        # type: (str|None) -> Iterable[DataproxyFile]
+        """
+        Yields files in this bucket
+        n.b. Marker holds place for offset meaning that if you provide a marker the api
+        will provide all files found after the marker while respecting the limit imposed (100)
+        per request
+        """
+        marker = None  # remember name of last entry
         visited_name = set()
         LOGGER.info(f'Listing contents in {self.dataproxy_entity_name}')
         url = f'/v1/{self.target}/{self.dataproxy_entity_name}'
@@ -77,15 +100,19 @@ class Bucket:
             resp = self.client.get(url, params={
                 'limit': self.LIMIT,
                 'marker': marker,
-                'prefix': prefix
+                'prefix': prefix,
+                'offset': 2
             })
 
             objects = resp.json().get("objects", [])
+
             if len(objects) == 0:
+                # no more files in the bucket
                 break
 
             for obj in objects:
                 yield DataproxyFile.from_json(self.client, self, obj)
+                # update marker
                 marker = obj.get("name")
                 if marker in visited_name:
                     raise RuntimeError(f"Bucket.ls error: hash {marker} has already been visited.")
@@ -124,3 +151,14 @@ class Bucket:
         upload_url = resp.json().get("url")
         LOGGER.info(f'got url: {upload_url}')
         return upload_url
+
+    @classmethod
+    def _parse_json_to_params(cls, bucket_json):
+        # type: (dict) -> dict
+        params = dict()
+        for json_key, param_name in BUCKET_PARAMS_MAP.items():
+            try:
+                params[param_name] = bucket_json[json_key]
+            except KeyError:
+                pass
+        return params
