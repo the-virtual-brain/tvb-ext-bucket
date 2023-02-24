@@ -1,4 +1,5 @@
 import os
+import tempfile
 
 import pytest
 from ebrains_drive.exceptions import DoesNotExist
@@ -134,11 +135,11 @@ def test_upload_file(mocker):
 
     fake_client = MockClient()
     bucket = Bucket.from_json(fake_client, BUCKET_STAT_JSON)
-    to_upload = TemporaryFile(mode='rb', delete=False)
-    to_upload.close()
+    fd, path = tempfile.mkstemp()
     try:
         # test passes if no error occurs
-        bucket.upload(to_upload.name, 'test_file')
+        bucket.upload(path, 'test_file')
     finally:
-        os.unlink(to_upload.name)
+        os.close(fd)
+        os.unlink(path)
 
