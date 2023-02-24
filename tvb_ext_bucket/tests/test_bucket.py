@@ -1,8 +1,11 @@
+import os
+
 import pytest
 from ebrains_drive.exceptions import DoesNotExist
 
 from tvb_ext_bucket.bucket_api.bucket import Bucket
 from requests import Response
+from tempfile import TemporaryFile
 
 
 BUCKET_STAT_JSON = {
@@ -58,12 +61,9 @@ class MockClient:
         }'''
         return resp
 
-    def delete(self, url: str) -> Response:
+    def put(self, url, _: any = None):
         resp = Response()
-        resp._content = b'{"details":"Object deleted","status_code":200}'
-        resp.status_code = 200
-        if url.find('fails_delete') > -1:
-            resp._content = b'{"status_code":500}'
+        resp._content = b'{"url":"fake_upload_url"}'
         return resp
 
 
@@ -121,3 +121,24 @@ def test_get_file_not_found():
     bucket = Bucket.from_json(fake_client, BUCKET_STAT_JSON)
     with pytest.raises(DoesNotExist):
         bucket.get_file('nonexistent')
+
+
+def test_upload_file(mocker):
+    def fake_request(method, url, data):
+        if method == 'PUT':
+            response = Response()
+            response.status_code = 200
+            return response
+        return Response()
+    mocker.patch('requests.request', fake_request)
+
+    fake_client = MockClient()
+    bucket = Bucket.from_json(fake_client, BUCKET_STAT_JSON)
+    to_upload = TemporaryFile(mode='rb', delete=False)
+    to_upload.close()
+    try:
+        # test passes if no error occurs
+        bucket.upload(to_upload.name, 'test_file')
+    finally:
+        os.unlink(to_upload.name)
+
