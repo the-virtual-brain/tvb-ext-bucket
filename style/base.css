@@ -271,3 +271,9 @@
 .bucket-ShareLink:hover {
   text-decoration: underline;
 }
+
+.scrollableY {
+  max-height: 70vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+}

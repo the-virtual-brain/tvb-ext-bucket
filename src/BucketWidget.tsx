@@ -39,6 +39,10 @@ export const BucketSpace = (): JSX.Element => {
   const data = useBucketSearch();
 
   useEffect(() => {
+    bucketBrowser.bucket = data.searchValue;
+  }, [data.setSearchValue]);
+
+  useEffect(() => {
     bucketBrowser.bucket = data.chosenValue;
   }, [data.chosenValue]);
 
@@ -87,6 +91,7 @@ export const BucketSpace = (): JSX.Element => {
         style={{
           display: showSpinner ? 'none' : 'block'
         }}
+        className={'scrollableY'}
       >
         {currentDir?.ls().map((bucketEntry): ReactElement => {
           let onClick = () => {
