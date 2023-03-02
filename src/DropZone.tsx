@@ -135,16 +135,20 @@ export const DropZone: React.FC<DropZone.IProps> = ({
       _drop: async (ev: IDragEvent): Promise<void> => {
         ev.preventDefault();
         ev.stopPropagation();
-        if (uploadingRef.current) {
-          await showErrorMessage(
-            notAllowedUpload.title,
-            notAllowedUpload.error
-          );
-          return;
-        }
+        // if (uploadingRef.current) {
+        //   await showErrorMessage(
+        //     notAllowedUpload.title,
+        //     notAllowedUpload.error
+        //   );
+        //   return;
+        // }
         setUploading(true);
         if (ev.source && (ev.source as IDragInitiator).action) {
-          await ev.source.action();
+          const actionOptions: IOptions = {
+            bucketName: bucketBrowser.bucket,
+            currentPath: bucketBrowser.currentDirectory?.absolutePath as string
+          };
+          await ev.source.action(actionOptions);
           await finishAction();
         } else {
           console.warn(
@@ -269,5 +273,9 @@ export interface IDragInitiator {
   action: AsyncCallable | Callable | undefined;
 }
 
-export type AsyncCallable = () => Promise<any>;
-export type Callable = () => any;
+export interface IOptions {
+  bucketName: string;
+  currentPath: string;
+}
+export type AsyncCallable = (options?: IOptions) => Promise<any>;
+export type Callable = (options?: IOptions) => any;
