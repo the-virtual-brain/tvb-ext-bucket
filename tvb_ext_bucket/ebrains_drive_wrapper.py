@@ -16,6 +16,7 @@ import os
 
 from tvb_ext_bucket.bucket_api.bucket_api import BucketApiClient
 from tvb_ext_bucket.bucket_api.bucket import Bucket
+from tvb_ext_bucket.bucket_api.buckets import Buckets, BucketDTO
 
 LOGGER = get_logger(__name__)
 
@@ -205,3 +206,7 @@ class BucketWrapper:
         resp.raise_for_status()
         dataproxy_file.delete()
         return {'name': new_name, 'path': dir_path + '/' + new_name}
+
+    def list_buckets(self):
+        buckets = self.client.buckets.list_buckets()
+        return [b.name for b in buckets]

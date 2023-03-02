@@ -6,11 +6,12 @@ import { folderIcon } from '@jupyterlab/ui-components';
 import { JpSpinner } from './JpSpinner';
 import { DropZone } from './DropZone';
 import { BucketContextProvider, useBucketContext } from './BucketContext';
+import { BucketSearch } from './BucketSearch';
+import { useBucketSearch } from './hooks';
 
 export const BucketSpace = (): JSX.Element => {
   const [currentDir, setCurrentDir] =
     useState<BucketFileBrowser.BucketDirectory | null>(null);
-  const [bucketName, setBucketName] = useState<string>('');
   const [showSpinner, setShowSpinner] = useState<boolean>(false);
 
   const bucketBrowser = useBucketContext().fileBrowser;
@@ -35,9 +36,11 @@ export const BucketSpace = (): JSX.Element => {
     [bucketBrowser]
   );
 
+  const data = useBucketSearch();
+
   useEffect(() => {
-    bucketBrowser.bucket = bucketName;
-  }, [bucketName]);
+    bucketBrowser.bucket = data.chosenValue;
+  }, [data.chosenValue]);
 
   return (
     <>
@@ -49,12 +52,13 @@ export const BucketSpace = (): JSX.Element => {
 
         <input
           type={'text'}
-          value={bucketName}
+          value={data.searchValue}
           aria-label={'bucket-name-input'}
           placeholder={'bucket-name'}
-          onChange={ev => setBucketName(ev.target.value)}
+          onChange={ev => data.setSearchValue(ev.target.value)}
         />
         <button onClick={getBucket}>Connect!</button>
+        <BucketSearch data={data} />
       </div>
 
       <div className={'bucket-BreadCrumbs'}>
@@ -79,7 +83,11 @@ export const BucketSpace = (): JSX.Element => {
       </div>
 
       <JpSpinner show={showSpinner} />
-      <ul style={{ display: showSpinner ? 'none' : 'block' }}>
+      <ul
+        style={{
+          display: showSpinner ? 'none' : 'block'
+        }}
+      >
         {currentDir?.ls().map((bucketEntry): ReactElement => {
           let onClick = () => {
             return;

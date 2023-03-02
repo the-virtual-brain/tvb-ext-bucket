@@ -51,6 +51,23 @@ export class BucketFileBrowser {
   }
 
   /**
+   * Gets a list of all the available buckets for the current user
+   */
+  async getAvailableBuckets(): Promise<Array<string>> {
+    let bucketsList: Array<string> = [];
+    try {
+      bucketsList = await requestAPI<Array<string>>('buckets');
+    } catch (e) {
+      await showErrorMessage(
+        'ERROR',
+        'Could not get available buckets from server'
+      );
+    }
+
+    return bucketsList;
+  }
+
+  /**
    * Get a list of all contents of current directory
    */
   ls(): Array<BucketFileBrowser.IBrowserEntry> {
