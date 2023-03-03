@@ -284,7 +284,6 @@
   top: 4.5em;
   z-index: 9999;
   background-color: var(--jp-layout-color1);
-  /*border-radius: 7px;*/
   box-shadow: var(--jp-elevation-z6);
   overflow-x: hidden;
   overflow-y: auto;
