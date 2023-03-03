@@ -41,7 +41,7 @@ export const BucketSpace = (): JSX.Element => {
 
   useEffect(() => {
     bucketBrowser.bucket = data.searchValue;
-  }, [data.setSearchValue]);
+  }, [data.searchValue]);
 
   useEffect(() => {
     bucketBrowser.bucket = data.chosenValue;
@@ -62,7 +62,7 @@ export const BucketSpace = (): JSX.Element => {
           placeholder={'bucket-name'}
           onChange={ev => data.setSearchValue(ev.target.value)}
           onFocus={_ev => setShowList(true)}
-          onBlur={_ev => setShowList(false)}
+          onBlur={_ev => setTimeout(() => setShowList(false), 500)}
         />
         <button onClick={getBucket}>Connect!</button>
         <BucketSearch data={data} showList={showList} />

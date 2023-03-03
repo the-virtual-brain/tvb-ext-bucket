@@ -36,15 +36,10 @@ export const BucketSearch: React.FC<BucketSearch.IProps> = ({
             {data.searchMatchingValues.map(val => {
               return (
                 <li
-                  onClick={ev => {
-                    console.log('click on bucket');
-                    // todo: does not trigger, needs fixing
-                    ev.preventDefault();
-                    ev.stopPropagation();
+                  onClick={_ev => {
                     data.setChosenValue(val);
                   }}
                   key={val}
-                  onFocus={() => console.log('focus bucket')}
                 >
                   {val}
                 </li>
