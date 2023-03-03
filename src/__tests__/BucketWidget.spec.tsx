@@ -10,7 +10,13 @@ jest.mock('../handler', () => {
     __esModule: true,
     requestAPI: jest
       .fn()
-      .mockImplementation((_url, _init, _settings) => Promise.resolve(filesData))
+      .mockImplementation((_url: string, _init, _settings) =>
+      {
+          if (_url.includes('buckets_list')) {
+              return Promise.resolve(['bucket1', 'test_bucket', 'bucket_2'])
+          }
+          return Promise.resolve(filesData)
+      })
   };
 });
 

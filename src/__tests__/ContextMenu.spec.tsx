@@ -17,6 +17,9 @@ jest.mock('../handler', () => {
     requestAPI: jest
       .fn()
       .mockImplementation((URL: string, _init, _settings) => {
+          if(URL.includes('buckets_list')) {
+              return Promise.resolve(['test_bucket', 'bucket_1', 'bucket_2'])
+          }
           if(URL.includes('objects')) {
               return Promise.resolve({success: true, message: 'file deleted'});
           }
@@ -37,11 +40,6 @@ const downloadSuccess = {
 }
 
 jest.mock('@jupyterlab/apputils', () => {
-    // interface IOptions {
-    //       title: string;
-    //       body: string;
-    //       buttons: Array<any>;
-    // }
     interface IErrorOptions {
         title: string;
         error: any;
@@ -49,10 +47,6 @@ jest.mock('@jupyterlab/apputils', () => {
     return {
         __esModule: true,
         ...jest.requireActual('@jupyterlab/apputils'),
-        // Dialog: {okButton:(_options: { label: string })=>{return;}},
-        // showDialog: jest
-        //     .fn()
-        //     .mockImplementation(async (_options: IOptions) => Promise.resolve(undefined)),
         showErrorMessage: jest
             .fn()
             .mockImplementation( async (_options: IErrorOptions) => Promise.resolve(undefined)),
@@ -118,7 +112,6 @@ describe('test context menu UI', () => {
                <BucketSpace/>
            </BucketContextProvider>
        );
-       // const bucketInput = queryByLabelText('bucket-name-input');
        const bucketInput = getByPlaceholderText('bucket-name');
        expect(bucketInput).toBeTruthy();
        await waitFor(() => {
