@@ -271,3 +271,28 @@
 .bucket-ShareLink:hover {
   text-decoration: underline;
 }
+
+.scrollableY {
+  max-height: 70vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.bucket-container ul.available-buckets {
+  max-height: 40vh;
+  position: absolute;
+  top: 4.5em;
+  z-index: 9999;
+  background-color: var(--jp-layout-color1);
+  box-shadow: var(--jp-elevation-z6);
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding-top: 0.5em;
+  padding-bottom: 0.5em;
+  width: 100%;
+}
+
+.bucket-container ul.available-buckets > li:hover {
+  background-color: var(--jp-layout-color2);
+  cursor: pointer;
+}

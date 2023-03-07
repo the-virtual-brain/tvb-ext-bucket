@@ -23,6 +23,18 @@ LOGGER = get_logger(__name__)
 class BucketsHandler(APIHandler):
     @tornado.web.authenticated
     def get(self):
+        try:
+            wrapper = BucketWrapper()
+            resp = wrapper.list_buckets()
+            self.finish(json.dumps(resp))
+        except Exception as e:
+            LOGGER.error(f'Could not get a list of available buckets : {str(e)}')
+            self.finish(json.dumps([]))
+
+
+class BucketHandler(APIHandler):
+    @tornado.web.authenticated
+    def get(self):
         response = {
             'success': False,
             'message': '',
@@ -187,6 +199,7 @@ def setup_handlers(web_app):
     host_pattern = ".*$"
 
     base_url = web_app.settings["base_url"]
+    buckets_list_pattern = url_path_join(base_url, "tvb_ext_bucket", "buckets_list")
     bucket_pattern = url_path_join(base_url, "tvb_ext_bucket", "buckets")
     download_pattern = url_path_join(base_url, "tvb_ext_bucket", "download")
     download_ulr_pattern = url_path_join(base_url, "tvb_ext_bucket", "download_url")
@@ -196,7 +209,8 @@ def setup_handlers(web_app):
     rename_handler_pattern = url_path_join(base_url, "tvb_ext_bucket", "rename")
 
     handlers = [
-        (bucket_pattern, BucketsHandler),
+        (buckets_list_pattern, BucketsHandler),
+        (bucket_pattern, BucketHandler),
         (download_pattern, DownloadHandler),
         (download_ulr_pattern, DownloadUrlHandler),
         (upload_pattern, UploadHandler),
