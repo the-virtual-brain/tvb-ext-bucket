@@ -15,7 +15,8 @@ export const BucketSpace = (): JSX.Element => {
   const [showSpinner, setShowSpinner] = useState<boolean>(false);
   const [showList, setShowList] = useState<boolean>(false);
 
-  const bucketBrowser = useBucketContext().fileBrowser;
+  const ctx = useBucketContext();
+  const bucketBrowser = ctx.fileBrowser;
 
   /**
    * decorator for async functions to show a spinner instead of the dir structure while they resolve
@@ -37,7 +38,7 @@ export const BucketSpace = (): JSX.Element => {
     [bucketBrowser]
   );
 
-  const data = useBucketSearch();
+  const data = useBucketSearch(ctx.bucketName);
 
   useEffect(() => {
     bucketBrowser.bucket = data.searchValue;
@@ -45,7 +46,15 @@ export const BucketSpace = (): JSX.Element => {
 
   useEffect(() => {
     bucketBrowser.bucket = data.chosenValue;
+    // ctx.setBucketName(data.chosenValue);
   }, [data.chosenValue]);
+
+  // if on mount we have a bucket name saved, open that bucket
+  useEffect(() => {
+    if (bucketBrowser.bucket !== '' || bucketBrowser.bucket !== null) {
+      getBucket();
+    }
+  }, []);
 
   return (
     <>
