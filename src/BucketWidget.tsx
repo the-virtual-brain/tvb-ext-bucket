@@ -34,6 +34,7 @@ export const BucketSpace = (): JSX.Element => {
     withSpinnerDecorator(async () => {
       const bucketHomeDir = await bucketBrowser.openBucket();
       bucketHomeDir && setCurrentDir(bucketHomeDir);
+      ctx.setBucketName(bucketBrowser.bucket);
     }),
     [bucketBrowser]
   );
@@ -46,7 +47,6 @@ export const BucketSpace = (): JSX.Element => {
 
   useEffect(() => {
     bucketBrowser.bucket = data.chosenValue;
-    // ctx.setBucketName(data.chosenValue);
   }, [data.chosenValue]);
 
   // if on mount we have a bucket name saved, open that bucket

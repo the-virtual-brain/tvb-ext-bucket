@@ -4,27 +4,18 @@ import { ContextError } from './exceptions';
 
 const BucketContext = createContext<IContext | undefined>(undefined);
 
-const BUCKET_STORAGE_KEY = 'tvb-ext-bucket:bucket-name';
+const BUCKET_KEY = 'tvb-ext-bucket:bucket-name';
 
 export const BucketContextProvider: React.FC = ({ children }) => {
-  const [bucketName, setBucketName] = useState<string>('');
-
-  useEffect(() => {
-    console.log('Query local storage for: ', BUCKET_STORAGE_KEY);
-    const bucket = localStorage.getItem(BUCKET_STORAGE_KEY);
-    console.log('Found value: ', bucket);
-    if (bucket === null || bucket === '') {
-      return;
-    }
-    setBucketName(bucket);
-  }, []);
+  const [bucketName, setBucketName] = useState<string>(
+    localStorage.getItem(BUCKET_KEY) as string
+  );
 
   useEffect(() => {
     if (bucketName === null || bucketName === '') {
       return;
     }
-    console.log('Change saved bucket to: ', bucketName);
-    localStorage.setItem(BUCKET_STORAGE_KEY, bucketName);
+    localStorage.setItem(BUCKET_KEY, bucketName);
   }, [bucketName]);
 
   const context = {

@@ -10,6 +10,7 @@ export const useBucketSearch = (prevChosenValue: string): IBucketSearch => {
   const [searchMatchingValues, setSearchMatchingValues] = useState<
     Array<string>
   >([]);
+
   useEffect(() => {
     let isMounted = true;
     if (isMounted) {
