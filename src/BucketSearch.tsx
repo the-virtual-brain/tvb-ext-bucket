@@ -1,5 +1,5 @@
 import React from 'react';
-import { IBucketSearch } from './hooks';
+import { IBucketSearch } from './hooks/useBucketSearch';
 
 export const BucketSearch: React.FC<BucketSearch.IProps> = ({
   data,
@@ -7,6 +7,7 @@ export const BucketSearch: React.FC<BucketSearch.IProps> = ({
 }) => {
   return (
     <div>
+      {data.error && <p style={{ color: 'red' }}>{data.error}</p>}
       {data.loading ? (
         <span className={'jp-Spinner'} />
       ) : (

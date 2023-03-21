@@ -1,30 +1,22 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useContext } from 'react';
 import { BucketFileBrowser } from './bucketFileBrowser';
 import { ContextError } from './exceptions';
+import { useStoredState } from './hooks/useStoredState';
 
 const BucketContext = createContext<IContext | undefined>(undefined);
 
-const BUCKET_KEY = 'tvb-ext-bucket:bucket-name';
-
 export const BucketContextProvider: React.FC = ({ children }) => {
-  const [bucketName, setBucketName] = useState<string>(
-    localStorage.getItem(BUCKET_KEY) as string
-  );
-
-  useEffect(() => {
-    if (bucketName === null || bucketName === '') {
-      return;
-    }
-    localStorage.setItem(BUCKET_KEY, bucketName);
-  }, [bucketName]);
+  // const [bucketName, setBucketName] = useStoredState<string>('', 'bucket-name');
+  const [shouldSaveLastBucket, setShouldSaveLastBucket] =
+    useStoredState<boolean>(true, 'last-bucket');
 
   const context = {
     fileBrowser: new BucketFileBrowser({
       bucketEndPoint: 'buckets',
-      bucket: bucketName
+      bucket: ''
     }),
-    bucketName: bucketName,
-    setBucketName: setBucketName
+    shouldSaveLastBucket,
+    setShouldSaveLastBucket
   };
 
   return (
@@ -48,6 +40,6 @@ export const useBucketContext = (): IContext => {
 
 export interface IContext {
   fileBrowser: BucketFileBrowser;
-  bucketName: string;
-  setBucketName: React.Dispatch<React.SetStateAction<string>>;
+  shouldSaveLastBucket: boolean;
+  setShouldSaveLastBucket: React.Dispatch<React.SetStateAction<boolean>>;
 }

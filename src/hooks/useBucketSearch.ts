@@ -1,12 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { requestAPI } from './handler';
+import { useStoredState } from './useStoredState';
+import { requestAPI } from '../handler';
 
-export const useBucketSearch = (prevChosenValue: string): IBucketSearch => {
+export const useBucketSearch = (): IBucketSearch => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>('');
   const [availableBuckets, setAvailableBuckets] = useState<Array<string>>([]);
-  const [searchValue, setSearchValue] = useState<string>(prevChosenValue);
-  const [chosenValue, setChosenValue] = useState<string>(prevChosenValue);
+  const [searchValue, setSearchValue] = useState<string>('');
+  const [chosenValue, setChosenValue] = useStoredState<string>(
+    '',
+    'prev-bucket'
+  );
   const [searchMatchingValues, setSearchMatchingValues] = useState<
     Array<string>
   >([]);

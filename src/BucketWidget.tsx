@@ -7,7 +7,7 @@ import { JpSpinner } from './JpSpinner';
 import { DropZone } from './DropZone';
 import { BucketContextProvider, useBucketContext } from './BucketContext';
 import { BucketSearch } from './BucketSearch';
-import { useBucketSearch } from './hooks';
+import { useBucketSearch } from './hooks/useBucketSearch';
 
 export const BucketSpace = (): JSX.Element => {
   const [currentDir, setCurrentDir] =
@@ -17,6 +17,7 @@ export const BucketSpace = (): JSX.Element => {
 
   const ctx = useBucketContext();
   const bucketBrowser = ctx.fileBrowser;
+  const data = useBucketSearch();
 
   /**
    * decorator for async functions to show a spinner instead of the dir structure while they resolve
@@ -34,12 +35,9 @@ export const BucketSpace = (): JSX.Element => {
     withSpinnerDecorator(async () => {
       const bucketHomeDir = await bucketBrowser.openBucket();
       bucketHomeDir && setCurrentDir(bucketHomeDir);
-      ctx.setBucketName(bucketBrowser.bucket);
     }),
     [bucketBrowser]
   );
-
-  const data = useBucketSearch(ctx.bucketName);
 
   useEffect(() => {
     bucketBrowser.bucket = data.searchValue;
@@ -51,8 +49,14 @@ export const BucketSpace = (): JSX.Element => {
 
   // if on mount we have a bucket name saved, open that bucket
   useEffect(() => {
-    if (bucketBrowser.bucket !== '' || bucketBrowser.bucket !== null) {
+    if (
+      ctx.shouldSaveLastBucket &&
+      data.chosenValue !== '' &&
+      data.chosenValue !== null
+    ) {
       getBucket();
+    } else {
+      data.setChosenValue('');
     }
   }, []);
 
@@ -75,6 +79,17 @@ export const BucketSpace = (): JSX.Element => {
         />
         <button onClick={getBucket}>Connect!</button>
         <BucketSearch data={data} showList={showList} />
+        <div>
+          <input
+            type={'checkbox'}
+            checked={ctx.shouldSaveLastBucket}
+            name={'save-last-bucket'}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              ctx.setShouldSaveLastBucket(e.target.checked)
+            }
+          />
+          <label htmlFor={'save-last-bucket'}>Save last accessed bucket</label>
+        </div>
       </div>
 
       <div className={'bucket-BreadCrumbs'}>
