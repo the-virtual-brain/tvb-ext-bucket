@@ -6,17 +6,25 @@ import { useStoredState } from './hooks/useStoredState';
 const BucketContext = createContext<IContext | undefined>(undefined);
 
 export const BucketContextProvider: React.FC = ({ children }) => {
-  // const [bucketName, setBucketName] = useStoredState<string>('', 'bucket-name');
-  const [shouldSaveLastBucket, setShouldSaveLastBucket] =
-    useStoredState<boolean>(true, 'last-bucket');
+  const [lastBucket, setLastBucket] = useStoredState<string>(
+    '',
+    'last-accessed-bucket'
+  );
+  const [autocompleteOption, setAutocompleteOption] =
+    useStoredState<AutoCompleteOptions>(
+      AutoCompleteOptions.None,
+      'autocomplete-option'
+    );
 
   const context = {
     fileBrowser: new BucketFileBrowser({
       bucketEndPoint: 'buckets',
       bucket: ''
     }),
-    shouldSaveLastBucket,
-    setShouldSaveLastBucket
+    lastBucket,
+    setLastBucket,
+    autocompleteOption,
+    setAutocompleteOption
   };
 
   return (
@@ -40,6 +48,16 @@ export const useBucketContext = (): IContext => {
 
 export interface IContext {
   fileBrowser: BucketFileBrowser;
-  shouldSaveLastBucket: boolean;
-  setShouldSaveLastBucket: React.Dispatch<React.SetStateAction<boolean>>;
+  lastBucket: string;
+  setLastBucket: React.Dispatch<React.SetStateAction<string>>;
+  autocompleteOption: AutoCompleteOptions;
+  setAutocompleteOption: React.Dispatch<
+    React.SetStateAction<AutoCompleteOptions>
+  >;
+}
+
+export enum AutoCompleteOptions {
+  None = 'no-preference',
+  LastAccessed = 'save-last',
+  Guess = 'guess'
 }

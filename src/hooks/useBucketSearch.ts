@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { useStoredState } from './useStoredState';
 import { requestAPI } from '../handler';
 
 export const useBucketSearch = (): IBucketSearch => {
@@ -7,10 +6,7 @@ export const useBucketSearch = (): IBucketSearch => {
   const [error, setError] = useState<string>('');
   const [availableBuckets, setAvailableBuckets] = useState<Array<string>>([]);
   const [searchValue, setSearchValue] = useState<string>('');
-  const [chosenValue, setChosenValue] = useStoredState<string>(
-    '',
-    'prev-bucket'
-  );
+  const [chosenValue, setChosenValue] = useState<string>('');
   const [searchMatchingValues, setSearchMatchingValues] = useState<
     Array<string>
   >([]);

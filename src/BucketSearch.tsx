@@ -13,23 +13,6 @@ export const BucketSearch: React.FC<BucketSearch.IProps> = ({
       ) : (
         <>
           <span className={'error'}>{(data.error as Error).toString()}</span>
-
-          <select
-            name={'bucket'}
-            id={'bucket'}
-            autoFocus={true}
-            value={data.chosenValue}
-            onChange={ev => data.setChosenValue(ev.target.value)}
-            style={{ display: 'none' }}
-          >
-            {data.searchMatchingValues.map(val => {
-              return (
-                <option value={val} key={val}>
-                  {val}
-                </option>
-              );
-            })}
-          </select>
           <ul
             className={'available-buckets'}
             style={{ visibility: showList ? 'visible' : 'hidden' }}

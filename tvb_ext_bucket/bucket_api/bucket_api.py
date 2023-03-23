@@ -22,6 +22,10 @@ class BucketApiClient(ClientBase):
 
         self.buckets = Buckets(self)
 
+    @property
+    def token(self):
+        return self._token
+
     @on_401_raise_unauthorized(
         "Failed. Note: BucketApiClient.create_new needs to have clb.drive:write as a part of scope.")
     def create_new(self, bucket_name: str, title=None, description="Created by ebrains_drive"):

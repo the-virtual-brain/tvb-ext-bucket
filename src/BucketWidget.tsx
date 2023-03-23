@@ -1,13 +1,19 @@
 import React, { ReactElement, useCallback, useEffect, useState } from 'react';
-import { ReactWidget } from '@jupyterlab/apputils';
+import { ReactWidget, showErrorMessage } from '@jupyterlab/apputils';
 import { BucketFileBrowser } from './bucketFileBrowser';
 import { CollabSpaceEntry } from './CollabSpaceEntry';
 import { folderIcon } from '@jupyterlab/ui-components';
 import { JpSpinner } from './JpSpinner';
 import { DropZone } from './DropZone';
-import { BucketContextProvider, useBucketContext } from './BucketContext';
+import {
+  AutoCompleteOptions,
+  BucketContextProvider,
+  useBucketContext
+} from './BucketContext';
 import { BucketSearch } from './BucketSearch';
 import { useBucketSearch } from './hooks/useBucketSearch';
+import { Settings } from './Settings';
+import { guessBucket } from './utils';
 
 export const BucketSpace = (): JSX.Element => {
   const [currentDir, setCurrentDir] =
@@ -35,6 +41,7 @@ export const BucketSpace = (): JSX.Element => {
     withSpinnerDecorator(async () => {
       const bucketHomeDir = await bucketBrowser.openBucket();
       bucketHomeDir && setCurrentDir(bucketHomeDir);
+      ctx.setLastBucket(bucketBrowser.bucket);
     }),
     [bucketBrowser]
   );
@@ -49,14 +56,22 @@ export const BucketSpace = (): JSX.Element => {
 
   // if on mount we have a bucket name saved, open that bucket
   useEffect(() => {
-    if (
-      ctx.shouldSaveLastBucket &&
-      data.chosenValue !== '' &&
-      data.chosenValue !== null
+    if (ctx.autocompleteOption === AutoCompleteOptions.Guess) {
+      guessBucket()
+        .then(guessedBucket => data.setChosenValue(guessedBucket))
+        .catch(err => {
+          showErrorMessage('ERROR', err).then(() => {
+            console.warn('Did not estimate a bucket!');
+            data.setChosenValue('');
+          });
+        });
+    } else if (
+      ctx.autocompleteOption === AutoCompleteOptions.None ||
+      ctx.autocompleteOption === null
     ) {
-      getBucket();
-    } else {
       data.setChosenValue('');
+    } else {
+      data.setChosenValue(ctx.lastBucket ? ctx.lastBucket : '');
     }
   }, []);
 
@@ -66,6 +81,7 @@ export const BucketSpace = (): JSX.Element => {
         <div className={'bucket-logo'}>
           <span className={'collab-logo'} />
           <span className={'bucket-logo-text'}>Bucket</span>
+          <Settings />
         </div>
 
         <input
@@ -79,17 +95,6 @@ export const BucketSpace = (): JSX.Element => {
         />
         <button onClick={getBucket}>Connect!</button>
         <BucketSearch data={data} showList={showList} />
-        <div>
-          <input
-            type={'checkbox'}
-            checked={ctx.shouldSaveLastBucket}
-            name={'save-last-bucket'}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-              ctx.setShouldSaveLastBucket(e.target.checked)
-            }
-          />
-          <label htmlFor={'save-last-bucket'}>Save last accessed bucket</label>
-        </div>
       </div>
 
       <div className={'bucket-BreadCrumbs'}>

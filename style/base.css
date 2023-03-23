@@ -296,3 +296,33 @@
   background-color: var(--jp-layout-color2);
   cursor: pointer;
 }
+
+.bucket-Settings {
+  position: absolute;
+  z-index: 9999;
+  background-color: var(--jp-layout-color1);
+  box-shadow: var(--jp-elevation-z6);
+  top: 2em;
+  right: 1em;
+  left: 1em;
+  display: flex;
+  flex-direction: column;
+  padding: 0.5em;
+}
+
+.bucket-Settings h4 {
+  margin: 0;
+  font-weight: 600;
+}
+
+.bucket-Settings-toggle {
+  display: inline-block;
+  margin-left: auto;
+  margin-right: 1em;
+  cursor: pointer;
+}
+
+.bucket-Settings-container {
+  margin-right: 0;
+  margin-left: auto;
+}
