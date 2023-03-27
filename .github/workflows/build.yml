@@ -42,7 +42,7 @@ jobs:
         set -eux
         python -m pip install .
 
-        pytest -vv -r ap --cov tvb_ext_bucket
+        pytest -vv -r ap --cov --cov-report=xml tvb_ext_bucket
         jupyter server extension list
         jupyter server extension list 2>&1 | grep -ie "tvb_ext_bucket.*OK"
 
@@ -57,6 +57,12 @@ jobs:
         pip install build
         python -m build --sdist
         pip uninstall -y "tvb-ext-bucket" jupyterlab
+
+    - name: SonarCloud Scan
+      uses: sonarsource/sonarcloud-github-action@master
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
     - name: Upload extension packages
       uses: actions/upload-artifact@v2
