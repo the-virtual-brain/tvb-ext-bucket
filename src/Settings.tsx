@@ -28,7 +28,13 @@ export const Settings: React.FC = () => {
             );
           }}
         >
-          <p>Auto-complete:</p>
+          <p
+            title={
+              'After setting an option refresh the page for the setting to have effect!'
+            }
+          >
+            Auto-complete:
+          </p>
           <div>
             <input
               type={'radio'}
@@ -40,7 +46,14 @@ export const Settings: React.FC = () => {
                 ctx.autocompleteOption === null
               }
             />
-            <label htmlFor={'no-preference'}>No auto-complete</label>
+            <label
+              htmlFor={'no-preference'}
+              title={
+                'On opening bucket extension, bucket name will not be completed automatically'
+              }
+            >
+              No auto-complete
+            </label>
           </div>
           <div>
             <input
@@ -52,7 +65,14 @@ export const Settings: React.FC = () => {
                 ctx.autocompleteOption === AutoCompleteOptions.LastAccessed
               }
             />
-            <label htmlFor={'save-last'}>Last accessed bucket</label>
+            <label
+              htmlFor={'save-last'}
+              title={
+                'On opening the bucket extension, bucket name will be autocompleted with the name of the last accessed bucket.'
+              }
+            >
+              Last accessed bucket
+            </label>
           </div>
           <div>
             <input
@@ -64,7 +84,14 @@ export const Settings: React.FC = () => {
                 ctx.autocompleteOption === AutoCompleteOptions.Guess
               }
             />
-            <label htmlFor={'guess'}>Estimated bucket</label>
+            <label
+              htmlFor={'guess'}
+              title={
+                'On opening bucket extension, will try to autocomplete bucket name by guessing the bucket from collab.'
+              }
+            >
+              Estimated bucket
+            </label>
           </div>
         </div>
       </div>
