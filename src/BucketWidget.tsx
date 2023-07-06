@@ -13,7 +13,7 @@ import {
 import { BucketSearch } from './BucketSearch';
 import { useBucketSearch } from './hooks/useBucketSearch';
 import { Settings } from './Settings';
-import { guessBucket } from './utils';
+import { guessBucket } from './utils/bucketUtils';
 
 export const BucketSpace = (): JSX.Element => {
   const [currentDir, setCurrentDir] =

@@ -1,4 +1,5 @@
-import {getExtension} from '../utils';
+import {getExtension} from '../utils/bucketUtils';
+import {assertIsNode} from "../utils/domUtils";
 
 
 describe('test getExtension', () => {
@@ -36,3 +37,14 @@ describe('test getExtension', () => {
         expect(getExtension(name)).toEqual(name);
     })
 })
+
+describe('test domUtils.ts', () => {
+   it('tests assertIsNode with Node as argument', () => {
+       const node = document.createElement('div');
+       expect(() => assertIsNode(node)).not.toThrow(TypeError);
+   });
+
+   it('tests assertIsNode with null as argument', () => {
+      expect(() => assertIsNode(null)).toThrow(TypeError);
+   });
+});

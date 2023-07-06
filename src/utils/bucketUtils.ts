@@ -2,7 +2,7 @@
  * Helper function to extract extension name from a file name
  * @param name
  */
-import { requestAPI } from './handler';
+import { requestAPI } from '../handler';
 
 export const getExtension = (name: string): string => {
   let extensionSuffix = '';

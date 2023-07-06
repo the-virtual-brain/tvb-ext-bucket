@@ -1,29 +1,32 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { AutoCompleteOptions, useBucketContext } from './BucketContext';
 import { settingsIcon } from '@jupyterlab/ui-components';
+import { useOuterClickClosable } from './hooks/useOuterClickClosable';
 
 export const Settings: React.FC = () => {
-  const [show, setShow] = useState<boolean>(false);
-  const ctx = useBucketContext();
+  const { autocompleteOption, setAutocompleteOption } = useBucketContext();
+  const { ref, isComponentVisible, setIsComponentVisible } =
+    useOuterClickClosable<HTMLSpanElement>(false);
 
   const toggleSettings = (_ev: React.MouseEvent): void => {
-    setShow(val => !val);
+    setIsComponentVisible(prev => !prev);
   };
+
   return (
-    <span className={'bucket-Settings-container'}>
+    <span className={'bucket-Settings-container'} ref={ref}>
       <span onClick={toggleSettings} className={'bucket-Settings-toggle'}>
         <settingsIcon.react />
       </span>
       <div
         className={'bucket-Settings'}
-        style={{ display: show ? 'block' : 'none' }}
+        style={{ display: isComponentVisible ? 'block' : 'none' }}
       >
         <h4>Settings</h4>
         <hr />
         <div
           className={'bucket-Preferences-container'}
           onChange={(e: React.FormEvent) => {
-            ctx.setAutocompleteOption(
+            setAutocompleteOption(
               (e.target as HTMLInputElement).value as AutoCompleteOptions
             );
           }}
@@ -42,8 +45,8 @@ export const Settings: React.FC = () => {
               id={'no-preference'}
               value={AutoCompleteOptions.None}
               defaultChecked={
-                ctx.autocompleteOption === AutoCompleteOptions.None ||
-                ctx.autocompleteOption === null
+                autocompleteOption === AutoCompleteOptions.None ||
+                autocompleteOption === null
               }
             />
             <label
@@ -62,7 +65,7 @@ export const Settings: React.FC = () => {
               id={'save-last'}
               value={AutoCompleteOptions.LastAccessed}
               defaultChecked={
-                ctx.autocompleteOption === AutoCompleteOptions.LastAccessed
+                autocompleteOption === AutoCompleteOptions.LastAccessed
               }
             />
             <label
@@ -80,9 +83,7 @@ export const Settings: React.FC = () => {
               name={'bucket-preferences'}
               id={'guess'}
               value={AutoCompleteOptions.Guess}
-              defaultChecked={
-                ctx.autocompleteOption === AutoCompleteOptions.Guess
-              }
+              defaultChecked={autocompleteOption === AutoCompleteOptions.Guess}
             />
             <label
               htmlFor={'guess'}

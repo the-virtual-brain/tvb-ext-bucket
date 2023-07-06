@@ -6,7 +6,7 @@ import {
 } from './exceptions';
 import { Dialog, showDialog, showErrorMessage } from '@jupyterlab/apputils';
 import { JpFileBrowser } from './JpFileBrowser';
-import { getExtension } from './utils';
+import { getExtension } from './utils/bucketUtils';
 
 export class BucketFileBrowser {
   private _bucket: string;
