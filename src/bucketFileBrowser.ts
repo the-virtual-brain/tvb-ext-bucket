@@ -108,10 +108,18 @@ export class BucketFileBrowser {
   }
 
   /**
-   * method to access a directory child to current directory
+   * method to access a directory child to current directory. If no dir name is provided, navigates home.
    */
-  async cd(directoryName: string): Promise<BucketFileBrowser.BucketDirectory> {
-    const dirToCd = this._currentDirectory?.directories.get(directoryName);
+  async cd(directoryName?: string): Promise<BucketFileBrowser.BucketDirectory> {
+    if ((!directoryName || directoryName === '') && this._homeDirectory) {
+      this._currentDirectory = this._homeDirectory;
+      this._currentFiles.clear();
+      this._breadcrumbs = [];
+      return this._homeDirectory;
+    }
+    const dirToCd = this._currentDirectory?.directories.get(
+      directoryName ?? ''
+    );
     if (!dirToCd) {
       throw new InvalidDirectoryError(
         `Can't cd to directory ${directoryName}! Directory doesn't seem to exist.`
@@ -120,11 +128,6 @@ export class BucketFileBrowser {
     this._currentDirectory = dirToCd;
     this._currentFiles.clear();
     this._breadcrumbs.push(dirToCd);
-    const prefix = this.breadcrumbs.reduce(
-      (acc, curr) => acc + curr.name + '/',
-      ''
-    );
-    console.log('Going to files in: ', prefix);
 
     return dirToCd;
   }

@@ -156,6 +156,16 @@
   animation: spin 0.5s infinite linear;
 }
 
+.bucket-home {
+  cursor: pointer;
+  padding: 0 3px;
+  display: inline-block;
+}
+
+.bucket-home:hover {
+  background-color: var(--jp-layout-color2);
+}
+
 .align-flex-horizontal {
   display: flex;
   flex-direction: row;

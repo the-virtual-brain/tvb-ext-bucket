@@ -21,9 +21,15 @@ export const BucketSpace = (): JSX.Element => {
   const [showSpinner, setShowSpinner] = useState<boolean>(false);
   const [showList, setShowList] = useState<boolean>(false);
 
-  const ctx = useBucketContext();
-  const bucketBrowser = ctx.fileBrowser;
+  const {
+    fileBrowser: bucketBrowser,
+    lastBucket,
+    setLastBucket,
+    autocompleteOption
+  } = useBucketContext();
+
   const data = useBucketSearch();
+  const { searchValue, setSearchValue, setChosenValue, chosenValue } = data;
 
   /**
    * decorator for async functions to show a spinner instead of the dir structure while they resolve
@@ -41,37 +47,48 @@ export const BucketSpace = (): JSX.Element => {
     withSpinnerDecorator(async () => {
       const bucketHomeDir = await bucketBrowser.openBucket();
       bucketHomeDir && setCurrentDir(bucketHomeDir);
-      ctx.setLastBucket(bucketBrowser.bucket);
+      setLastBucket(bucketBrowser.bucket);
+    }),
+    [bucketBrowser]
+  );
+
+  const navigateHome = useCallback(
+    withSpinnerDecorator(async () => {
+      if (!bucketBrowser.currentDirectory) {
+        return;
+      }
+      const home = await bucketBrowser.cd();
+      setCurrentDir(home);
     }),
     [bucketBrowser]
   );
 
   useEffect(() => {
-    bucketBrowser.bucket = data.searchValue;
-  }, [data.searchValue]);
+    bucketBrowser.bucket = searchValue;
+  }, [searchValue]);
 
   useEffect(() => {
-    bucketBrowser.bucket = data.chosenValue;
-  }, [data.chosenValue]);
+    bucketBrowser.bucket = chosenValue;
+  }, [chosenValue]);
 
   // if on mount we have a bucket name saved, open that bucket
   useEffect(() => {
-    if (ctx.autocompleteOption === AutoCompleteOptions.Guess) {
+    if (autocompleteOption === AutoCompleteOptions.Guess) {
       guessBucket()
-        .then(guessedBucket => data.setChosenValue(guessedBucket))
+        .then(guessedBucket => setChosenValue(guessedBucket))
         .catch(err => {
           showErrorMessage('ERROR', err).then(() => {
             console.warn('Did not estimate a bucket!');
-            data.setChosenValue('');
+            setChosenValue('');
           });
         });
     } else if (
-      ctx.autocompleteOption === AutoCompleteOptions.None ||
-      ctx.autocompleteOption === null
+      autocompleteOption === AutoCompleteOptions.None ||
+      autocompleteOption === null
     ) {
-      data.setChosenValue('');
+      setChosenValue('');
     } else {
-      data.setChosenValue(ctx.lastBucket ? ctx.lastBucket : '');
+      setChosenValue(lastBucket ?? '');
     }
   }, []);
 
@@ -86,10 +103,10 @@ export const BucketSpace = (): JSX.Element => {
 
         <input
           type={'text'}
-          value={data.searchValue}
+          value={searchValue}
           aria-label={'bucket-name-input'}
           placeholder={'bucket-name'}
-          onChange={ev => data.setSearchValue(ev.target.value)}
+          onChange={ev => setSearchValue(ev.target.value)}
           onFocus={_ev => setShowList(true)}
           onBlur={_ev => setTimeout(() => setShowList(false), 500)}
         />
@@ -98,7 +115,9 @@ export const BucketSpace = (): JSX.Element => {
       </div>
 
       <div className={'bucket-BreadCrumbs'}>
-        <folderIcon.react tag="span" className={'bucket-home'} />
+        <span onClick={navigateHome}>
+          <folderIcon.react tag="span" className={'bucket-home'} />
+        </span>
         {bucketBrowser.breadcrumbs.map((dir, index) => {
           return (
             <span
@@ -112,6 +131,7 @@ export const BucketSpace = (): JSX.Element => {
                 setCurrentDir(currentDir);
               })}
             >
+              {index === 0 && '/'}
               {dir.name}/
             </span>
           );
