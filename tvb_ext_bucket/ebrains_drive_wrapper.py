@@ -16,7 +16,7 @@ import os
 
 from tvb_ext_bucket.bucket_api.bucket_api import BucketApiClient
 from tvb_ext_bucket.bucket_api.bucket import Bucket
-from tvb_ext_bucket.bucket_api.buckets import Buckets, BucketDTO
+import pathlib
 
 LOGGER = get_logger(__name__)
 
@@ -98,7 +98,8 @@ class BucketWrapper:
         files_list = [f.name for f in bucket.ls()]
         return files_list
 
-    def get_client(self):
+    @staticmethod
+    def get_client():
         # type: () -> BucketApiClient
         """
         Get an instance of the BucketApiClient
@@ -210,3 +211,34 @@ class BucketWrapper:
     def list_buckets(self):
         buckets = self.client.buckets.list_buckets()
         return [b.name for b in buckets]
+
+    def guess_bucket(self):
+        # type: () -> str
+        """
+        Attempt to guess a bucket name by looking for repos named as the mounted drive
+        """
+        LOGGER.info('Trying to guess bucket...')
+        token = self.client.token
+        collab_name = pathlib.Path.cwd().parts[4]  # educated guess, safer than lab env vars
+        LOGGER.info(f'educated guess: {collab_name}')
+        LOGGER.info('getting drive client...')
+        drive_client = ebrains_drive.connect(token=token)
+        LOGGER.info(f'try to get repo by name {collab_name}...')
+        repos = drive_client.repos.get_repos_by_name(collab_name)
+        assert (len(repos) == 1)
+        LOGGER.info(f'found {len(repos)} repos')
+        LOGGER.info(f'attempting to find collab of repo {repos[0].id}')
+        response = requests.get(
+            "https://wiki.ebrains.eu/rest/v1/collabs",
+            params={
+                "driveId": repos[0].id,
+            },
+            headers={'Authorization': f'Bearer {token}'}
+        )
+        if not response.ok:
+            LOGGER.error(f'Could not complete request: {response.reason}')
+            raise ConnectionError(f'Failed request: {response.reason}')
+
+        bucket_name = response.json()['name']  # same as collab url name
+        LOGGER.info(f'Estimated bucket to be {bucket_name}')
+        return bucket_name

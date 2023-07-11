@@ -1,15 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { requestAPI } from './handler';
+import { requestAPI } from '../handler';
 
 export const useBucketSearch = (): IBucketSearch => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>('');
   const [availableBuckets, setAvailableBuckets] = useState<Array<string>>([]);
   const [searchValue, setSearchValue] = useState<string>('');
-  const [chosenValue, setChosenValue] = useState<string>(searchValue);
+  const [chosenValue, setChosenValue] = useState<string>('');
   const [searchMatchingValues, setSearchMatchingValues] = useState<
     Array<string>
   >([]);
+
   useEffect(() => {
     let isMounted = true;
     if (isMounted) {
@@ -31,12 +32,9 @@ export const useBucketSearch = (): IBucketSearch => {
   }, []);
 
   useEffect(() => {
-    const filteredValues = [];
-    for (const value of availableBuckets) {
-      if (value.includes(searchValue)) {
-        filteredValues.push(value);
-      }
-    }
+    const filteredValues = availableBuckets.filter(bucketName =>
+      bucketName.includes(searchValue)
+    );
     setSearchMatchingValues(filteredValues);
   }, [searchValue]);
 

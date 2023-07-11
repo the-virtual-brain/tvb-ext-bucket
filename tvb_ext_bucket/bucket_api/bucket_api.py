@@ -22,6 +22,10 @@ class BucketApiClient(ClientBase):
 
         self.buckets = Buckets(self)
 
+    @property
+    def token(self):
+        return self._token
+
     @on_401_raise_unauthorized(
         "Failed. Note: BucketApiClient.create_new needs to have clb.drive:write as a part of scope.")
     def create_new(self, bucket_name: str, title=None, description="Created by ebrains_drive"):
@@ -46,7 +50,7 @@ class BucketApiClient(ClientBase):
         self.send_request("DELETE", f"/v1/buckets/{bucket_name}")
 
     def send_request(self, method: str, url: str, *args, **kwargs):
-        hdr, info, sig = self._token.split('.')
+        _, info, _ = self._token.split('.')
         info_json = base64.b64decode(info + '==').decode('utf-8')
 
         # https://www.rfc-editor.org/rfc/rfc7519#section-2

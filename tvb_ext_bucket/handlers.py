@@ -195,6 +195,25 @@ class RenameHandler(APIHandler):
             self.finish(json.dumps(response))
 
 
+class GuessBucketHandler(APIHandler):
+    def get(self):
+        response = {
+            'success': False,
+            'bucket': '',
+            'message': ''
+        }
+        try:
+            wrapper = BucketWrapper()
+            response['bucket'] = wrapper.guess_bucket()
+            response['success'] = True
+        except AssertionError:
+            response['message'] = 'Could not identify a repo. ' \
+                                  'This installation of tvb-ext-bucket might not be in an ebrains environment!'
+        except Exception as e:
+            response['message'] = str(e)
+        self.finish(json.dumps(response))
+
+
 def setup_handlers(web_app):
     host_pattern = ".*$"
 
@@ -207,6 +226,7 @@ def setup_handlers(web_app):
     local_upload_pattern = url_path_join(base_url, "tvb_ext_bucket", "local_upload")
     objects_handler = url_path_join(base_url, "tvb_ext_bucket", r"objects/(.*)/(.*)")
     rename_handler_pattern = url_path_join(base_url, "tvb_ext_bucket", "rename")
+    guess_bucket_pattern = url_path_join(base_url, "tvb_ext_bucket", "guess_bucket")
 
     handlers = [
         (buckets_list_pattern, BucketsHandler),
@@ -216,6 +236,7 @@ def setup_handlers(web_app):
         (upload_pattern, UploadHandler),
         (local_upload_pattern, LocalUploadHandler),
         (objects_handler, ObjectsHandler),
-        (rename_handler_pattern, RenameHandler)
+        (rename_handler_pattern, RenameHandler),
+        (guess_bucket_pattern, GuessBucketHandler)
     ]
     web_app.add_handlers(host_pattern, handlers)

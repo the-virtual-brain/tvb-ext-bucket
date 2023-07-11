@@ -1,18 +1,33 @@
-import React, { createContext, useState, useContext } from 'react';
+import React, { createContext, useContext, useMemo } from 'react';
 import { BucketFileBrowser } from './bucketFileBrowser';
 import { ContextError } from './exceptions';
+import { useStoredState } from './hooks/useStoredState';
 
 const BucketContext = createContext<IContext | undefined>(undefined);
 
 export const BucketContextProvider: React.FC = ({ children }) => {
-  const [bucketName, setBucketName] = useState<string>('');
+  const [lastBucket, setLastBucket] = useStoredState<string>(
+    '',
+    'last-accessed-bucket'
+  );
+  const [autocompleteOption, setAutocompleteOption] =
+    useStoredState<AutoCompleteOptions>(
+      AutoCompleteOptions.None,
+      'autocomplete-option'
+    );
+
+  // no need to re-instantiate browser ever again after component is mounted
+  const bucketBrowser = useMemo(
+    () => new BucketFileBrowser({ bucketEndPoint: 'buckets', bucket: '' }),
+    []
+  );
+
   const context = {
-    fileBrowser: new BucketFileBrowser({
-      bucketEndPoint: 'buckets',
-      bucket: bucketName
-    }),
-    bucketName: bucketName,
-    setBucketName: setBucketName
+    fileBrowser: bucketBrowser,
+    lastBucket,
+    setLastBucket,
+    autocompleteOption,
+    setAutocompleteOption
   };
 
   return (
@@ -36,6 +51,16 @@ export const useBucketContext = (): IContext => {
 
 export interface IContext {
   fileBrowser: BucketFileBrowser;
-  bucketName: string;
-  setBucketName: React.Dispatch<React.SetStateAction<string>>;
+  lastBucket: string;
+  setLastBucket: React.Dispatch<React.SetStateAction<string>>;
+  autocompleteOption: AutoCompleteOptions;
+  setAutocompleteOption: React.Dispatch<
+    React.SetStateAction<AutoCompleteOptions>
+  >;
+}
+
+export enum AutoCompleteOptions {
+  None = 'no-preference',
+  LastAccessed = 'save-last',
+  Guess = 'guess'
 }
