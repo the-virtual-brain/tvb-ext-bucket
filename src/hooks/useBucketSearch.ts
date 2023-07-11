@@ -32,12 +32,9 @@ export const useBucketSearch = (): IBucketSearch => {
   }, []);
 
   useEffect(() => {
-    const filteredValues = [];
-    for (const value of availableBuckets) {
-      if (value.includes(searchValue)) {
-        filteredValues.push(value);
-      }
-    }
+    const filteredValues = availableBuckets.filter(bucketName =>
+      bucketName.includes(searchValue)
+    );
     setSearchMatchingValues(filteredValues);
   }, [searchValue]);
 

@@ -1,4 +1,4 @@
-import React, { createContext, useContext } from 'react';
+import React, { createContext, useContext, useMemo } from 'react';
 import { BucketFileBrowser } from './bucketFileBrowser';
 import { ContextError } from './exceptions';
 import { useStoredState } from './hooks/useStoredState';
@@ -16,11 +16,14 @@ export const BucketContextProvider: React.FC = ({ children }) => {
       'autocomplete-option'
     );
 
+  // no need to re-instantiate browser ever again after component is mounted
+  const bucketBrowser = useMemo(
+    () => new BucketFileBrowser({ bucketEndPoint: 'buckets', bucket: '' }),
+    []
+  );
+
   const context = {
-    fileBrowser: new BucketFileBrowser({
-      bucketEndPoint: 'buckets',
-      bucket: ''
-    }),
+    fileBrowser: bucketBrowser,
     lastBucket,
     setLastBucket,
     autocompleteOption,
