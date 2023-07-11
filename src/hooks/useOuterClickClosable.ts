@@ -36,11 +36,7 @@ export function useOuterClickClosable<T extends Element>(
   const handleClickOutside = (mouseEvent: MouseEvent): void => {
     const target: EventTarget | null = mouseEvent.target;
     assertIsNode(target);
-    if (
-      options &&
-      options.refToIgnore &&
-      options.refToIgnore?.current?.contains(target)
-    ) {
+    if (options?.refToIgnore?.current?.contains(target)) {
       return;
     }
     if (ref.current && !ref?.current?.contains(target)) {
