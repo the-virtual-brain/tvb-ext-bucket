@@ -9,13 +9,13 @@ import requests
 
 from ebrains_drive.files import DataproxyFile
 from ebrains_drive.exceptions import Unauthorized
+from ebrains_drive.bucket import Bucket
 
 from tvb_ext_bucket.logger.builder import get_logger
 from tvb_ext_bucket.exceptions import CollabTokenError, CollabAccessError, DataproxyFileNotFound
+from tvb_ext_bucket.bucket_api.bucket_api import ExtendedBucketApiClient
 import os
 
-from tvb_ext_bucket.bucket_api.bucket_api import BucketApiClient
-from tvb_ext_bucket.bucket_api.bucket import Bucket
 import pathlib
 
 LOGGER = get_logger(__name__)
@@ -100,7 +100,7 @@ class BucketWrapper:
 
     @staticmethod
     def get_client():
-        # type: () -> BucketApiClient
+        # type: () -> ExtendedBucketApiClient
         """
         Get an instance of the BucketApiClient
         Returns
@@ -118,7 +118,7 @@ class BucketWrapper:
             raise CollabTokenError(f"Cannot connect to EBRAINS HPC without an auth token! Either run this on "
                                    f"Collab, or define the {TOKEN_ENV_VAR} environment variable!")
         LOGGER.info('Token retrieved successfully!')
-        return BucketApiClient(token=token)
+        return ExtendedBucketApiClient(token=token)
 
     def download_file(self, file_path, bucket_name, location):
         # type: (str, str, str) -> bool
