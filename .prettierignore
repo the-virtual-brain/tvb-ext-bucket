@@ -2,5 +2,5 @@ node_modules
 **/node_modules
 **/lib
 **/package.json
-**/src/__tests__
-tvb-ext-bucket
+!/package.json
+tvb_ext_bucket
