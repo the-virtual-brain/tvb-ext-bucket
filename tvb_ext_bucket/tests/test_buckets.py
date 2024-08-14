@@ -1,4 +1,4 @@
-from tvb_ext_bucket.bucket_api.buckets import Buckets
+from tvb_ext_bucket.bucket_api.buckets import ExtendedBuckets
 from requests import Response
 
 
@@ -20,13 +20,13 @@ class MockClient:
 
 def test_buckets_instance():
     fake_client = MockClient()
-    buckets = Buckets(fake_client)
+    buckets = ExtendedBuckets(fake_client)
     assert buckets.client == fake_client
     assert buckets._available_buckets == []
 
 
 def test_get_bucket():
     fake_client = MockClient()
-    buckets = Buckets(fake_client)
+    buckets = ExtendedBuckets(fake_client)
     bucket = buckets.get_bucket('tvb-widgets')
     assert bucket.name == 'tvb-widgets'

@@ -2,9 +2,8 @@ import os
 import tempfile
 
 import pytest
+from ebrains_drive.bucket import Bucket
 from ebrains_drive.exceptions import DoesNotExist
-
-from tvb_ext_bucket.bucket_api.bucket import Bucket
 from requests import Response
 from tempfile import TemporaryFile
 
@@ -82,7 +81,7 @@ def test_bucket_instance():
     assert bucket.last_modified == last_modified
     assert bucket.public is False
     assert bucket.dataproxy_entity_name == name
-    assert bucket.is_initialised is False
+    assert bucket.is_initialized is None
     assert bucket.target == 'buckets'
     assert bucket.role is None
 
@@ -98,7 +97,7 @@ def test_bucket_instance_from_json():
     assert bucket.last_modified == BUCKET_STAT_JSON['last_modified']
     assert bucket.public == BUCKET_STAT_JSON['is_public']
     assert bucket.dataproxy_entity_name == BUCKET_STAT_JSON['name']
-    assert bucket.is_initialised == BUCKET_STAT_JSON['is_initialized']
+    assert bucket.is_initialized == BUCKET_STAT_JSON['is_initialized']
     assert bucket.role == BUCKET_STAT_JSON['role']
 
 
