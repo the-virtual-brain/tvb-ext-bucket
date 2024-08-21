@@ -18,6 +18,7 @@
     -moz-transform: rotate(360deg);
   }
 }
+
 @keyframes spin {
   from {
     -webkit-transform: rotate(0deg);
@@ -27,6 +28,7 @@
     -webkit-transform: rotate(360deg);
   }
 }
+
 @keyframes spin {
   from {
     transform: rotate(0deg);
@@ -95,8 +97,7 @@
   border: var(--jp-border-width) solid var(--jp-ui-font-size1);
   box-shadow: var(--jp-elevation-z6);
   white-space: nowrap;
-  overflow-x: hidden;
-  overflow-y: auto;
+  overflow: hidden auto;
   outline: none;
   opacity: 1;
   width: 200px;
@@ -120,7 +121,7 @@
 
 .collab-logo {
   display: inline-block;
-  background-image: url(Collaboratory_bucket_simple.png);
+  background-image: url('Collaboratory_bucket_simple.png');
   background-repeat: no-repeat;
   background-size: contain;
   height: 40px;
@@ -141,7 +142,7 @@
 }
 
 .bucket-CollabLogo {
-  background-image: url(hdd-o-4.svg);
+  background-image: url('hdd-o-4.svg');
   filter: opacity(70%);
 }
 
@@ -284,8 +285,7 @@
 
 .scrollableY {
   max-height: 70vh;
-  overflow-y: auto;
-  overflow-x: hidden;
+  overflow: hidden auto;
 }
 
 .bucket-container ul.available-buckets {
@@ -295,8 +295,7 @@
   z-index: 9999;
   background-color: var(--jp-layout-color1);
   box-shadow: var(--jp-elevation-z6);
-  overflow-x: hidden;
-  overflow-y: auto;
+  overflow: hidden auto;
   padding-top: 0.5em;
   padding-bottom: 0.5em;
   width: 100%;
