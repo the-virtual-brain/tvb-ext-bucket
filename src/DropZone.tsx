@@ -12,6 +12,7 @@ import { MimeData } from '@lumino/coreutils';
 import { Contents } from '@jupyterlab/services';
 import { Dialog, showDialog, showErrorMessage } from '@jupyterlab/apputils';
 import { UploadAnimation } from './FileTransferAnimations';
+import IError = Dialog.IError;
 
 export const DropZone: React.FC<DropZone.IProps> = ({
   show,
@@ -62,8 +63,9 @@ export const DropZone: React.FC<DropZone.IProps> = ({
 
     let item = possibleTargets?.next();
     while (item) {
-      items.push(item);
-      if (item.name === dragSourceElement?.innerText) {
+      const currentItem = item.value;
+      items.push(currentItem);
+      if (currentItem.name === dragSourceElement?.innerText) {
         isValidDragSource = true;
       }
       item = possibleTargets?.next();
@@ -207,9 +209,8 @@ export const DropZone: React.FC<DropZone.IProps> = ({
         try {
           const fileToUpload = e.dataTransfer.files[0];
           const fileName = fileToUpload.name;
-          const uploadUrl = await bucketBrowser.currentDirectory?.getUploadUrl(
-            fileName
-          );
+          const uploadUrl =
+            await bucketBrowser.currentDirectory?.getUploadUrl(fileName);
           if (!uploadUrl) {
             return;
           }
@@ -226,7 +227,7 @@ export const DropZone: React.FC<DropZone.IProps> = ({
             await finishAction();
           }
         } catch (e) {
-          await showErrorMessage('Upload Failed', e);
+          await showErrorMessage('Upload Failed', e as string | IError);
         }
       }
     }

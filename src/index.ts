@@ -5,7 +5,7 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
-import { FileBrowser, IFileBrowserFactory } from '@jupyterlab/filebrowser';
+import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
 
 import { ICommandPalette, WidgetTracker } from '@jupyterlab/apputils';
 
@@ -20,6 +20,7 @@ import { JpFileBrowser } from './JpFileBrowser';
  */
 const plugin: JupyterFrontEndPlugin<void> = {
   id: 'tvb-ext-bucket:plugin',
+  description: 'Extension for collabs bucket interaction',
   autoStart: true,
   requires: [
     ICommandPalette,
@@ -39,8 +40,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
     console.log('JupyterLab extension tvb-ext-bucket is activated!');
 
     // set up the default file browser
-    const browser: FileBrowser = fileBrowserFactory.defaultBrowser;
-    JpFileBrowser.current = browser;
+    JpFileBrowser.current = fileBrowserFactory.createFileBrowser('default');
 
     const id = 'tvb-ext-bucket';
     const sidebar = new BucketWidget();

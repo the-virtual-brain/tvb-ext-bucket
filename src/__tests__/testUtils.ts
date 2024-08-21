@@ -10,6 +10,6 @@ export const getError = async (call: () => unknown): Promise<Error> => {
 
     throw new NoErrorThrownError();
   } catch (error) {
-    return error;
+    return error as Error;
   }
 };
