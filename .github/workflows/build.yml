@@ -88,7 +88,7 @@ jobs:
         architecture: 'x64'
     - uses: actions/download-artifact@v4
       with:
-        name: extension-artifacts
+        name: extension-artifacts-3.11
     - name: Install and Test
       run: |
         set -eux
@@ -124,7 +124,7 @@ jobs:
     - name: Download extension package
       uses: actions/download-artifact@v4
       with:
-        name: extension-artifacts
+        name: extension-artifacts-${{ matrix.python-version }}
 
     - name: Install the extension
       run: |
