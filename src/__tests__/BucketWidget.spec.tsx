@@ -89,7 +89,7 @@ describe('Test BucketContext', () => {
         const WrongComponent = () => {
             const bucket = useBucketContext();
             return (
-                <div>{bucket}</div>
+                <div>{JSON.stringify(bucket)}</div>
             )
         }
         const err = await getError(() => render(<WrongComponent/>));

@@ -7,6 +7,7 @@ import {
 import { Dialog, showDialog, showErrorMessage } from '@jupyterlab/apputils';
 import { JpFileBrowser } from './JpFileBrowser';
 import { getExtension } from './utils/bucketUtils';
+import IError = Dialog.IError;
 
 export class BucketFileBrowser {
   private _bucket: string;
@@ -402,7 +403,7 @@ export namespace BucketFileBrowser {
           buttons: [Dialog.okButton({ label: 'OK' })]
         });
       } catch (err) {
-        await showErrorMessage('Something went wrong!', err);
+        await showErrorMessage('Something went wrong!', err as string | IError);
       }
     }
 
@@ -418,7 +419,7 @@ export namespace BucketFileBrowser {
         );
         url = response.url;
       } catch (e) {
-        await showErrorMessage('Failed', e);
+        await showErrorMessage('Failed', e as string | IError);
       }
 
       return url;
@@ -436,7 +437,7 @@ export namespace BucketFileBrowser {
           { method: 'DELETE' }
         );
       } catch (e) {
-        await showErrorMessage('Failed', e);
+        await showErrorMessage('Failed', e as string | IError);
       }
     }
 

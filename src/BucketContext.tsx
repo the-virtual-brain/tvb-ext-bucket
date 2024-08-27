@@ -1,11 +1,18 @@
-import React, { createContext, useContext, useMemo } from 'react';
+import React, {
+  createContext,
+  PropsWithChildren,
+  useContext,
+  useMemo
+} from 'react';
 import { BucketFileBrowser } from './bucketFileBrowser';
 import { ContextError } from './exceptions';
 import { useStoredState } from './hooks/useStoredState';
 
 const BucketContext = createContext<IContext | undefined>(undefined);
 
-export const BucketContextProvider: React.FC = ({ children }) => {
+export const BucketContextProvider: React.FC<PropsWithChildren> = ({
+  children
+}) => {
   const [lastBucket, setLastBucket] = useStoredState<string>(
     '',
     'last-accessed-bucket'

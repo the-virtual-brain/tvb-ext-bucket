@@ -5,8 +5,9 @@ import { fileIcon, folderIcon } from '@jupyterlab/ui-components';
 import { DragDownload } from './DragDownload';
 import BucketFile = BucketFileBrowser.BucketFile;
 import { useBucketContext } from './BucketContext';
-import { showErrorMessage } from '@jupyterlab/apputils';
+import { Dialog, showErrorMessage } from '@jupyterlab/apputils';
 import { useToolTip } from './Tooltip';
+import IError = Dialog.IError;
 
 export function CollabSpaceEntry({
   tag,
@@ -60,7 +61,7 @@ export function CollabSpaceEntry({
       await file.rename(newName);
       await onContextFinish();
     } catch (e) {
-      await showErrorMessage('Failed to rename', e);
+      await showErrorMessage('Failed to rename', e as string | IError);
     }
   };
   return (
@@ -117,9 +118,9 @@ export namespace CollabSpaceEntry {
 }
 
 namespace Private {
-  export type WrapperProps = {
+  export type WrapperProps = React.PropsWithChildren<{
     tag: 'li' | 'div';
-  };
+  }>;
 
   export const Wrapper: React.FC<WrapperProps> = ({
     tag,

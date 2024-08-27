@@ -1,4 +1,9 @@
-import React, { useCallback, useState, useEffect } from 'react';
+import React, {
+  useCallback,
+  useState,
+  useEffect,
+  PropsWithChildren
+} from 'react';
 import {
   downloadIcon,
   editIcon,
@@ -8,6 +13,7 @@ import {
 import { ContextMenuItem } from './ContextMenuItem';
 import { useBucketContext } from './BucketContext';
 import { Dialog, showDialog, showErrorMessage } from '@jupyterlab/apputils';
+import IError = Dialog.IError;
 
 export const ContextMenu: React.FC<ContextMenuNamespace.IProps> = ({
   name,
@@ -26,7 +32,7 @@ export const ContextMenu: React.FC<ContextMenuNamespace.IProps> = ({
   }, []);
 
   const handleContext = useCallback(
-    ev => {
+    (ev: React.MouseEvent) => {
       ev.preventDefault();
       setShow(prevState => !prevState);
     },
@@ -113,7 +119,7 @@ export const ContextMenu: React.FC<ContextMenuNamespace.IProps> = ({
         buttons: [Dialog.okButton({ label: 'Close' })]
       });
     } catch (e) {
-      await showErrorMessage('ERROR', e);
+      await showErrorMessage('ERROR', e as string | IError);
     }
   }, [name]);
 
@@ -166,7 +172,7 @@ export const ContextMenu: React.FC<ContextMenuNamespace.IProps> = ({
 };
 
 export namespace ContextMenuNamespace {
-  export interface IProps {
+  export interface IProps extends PropsWithChildren {
     name: string;
     onContextFinish: () => void;
     renameAction: () => void;
