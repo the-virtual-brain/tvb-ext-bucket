@@ -7,9 +7,6 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
 
 jobs:
   build:
@@ -29,7 +26,7 @@ jobs:
       uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
 
     - name: Install dependencies
-      run: python -m pip install -U "jupyterlab>=4.0.0,<5" ebrains-drive pytest pytest-mock "pytest-jupyter[server]>=0.6.0" pytest_tornasync pytest-cov
+      run: python -m pip install -U "jupyterlab>=4.0.0,<5" ebrains-drive pytest pytest-mock "pytest-jupyter[server]>=0.6.0" pytest_tornasync build
 
     - name: Lint the extension
       run: |
@@ -37,7 +34,7 @@ jobs:
         jlpm
         jlpm run lint:check
 
-    - name: Test the extension
+    - name: Test the extension with jlpm
       run: |
         set -eux
         jlpm run test
@@ -47,13 +44,15 @@ jobs:
         set -eux
         python -m pip install .[test]
 
-        pytest -vv -r ap --cov --cov-report=xml tvb_ext_bucket
-        jupyter server extension list
         jupyter server extension list 2>&1 | grep -ie "tvb_ext_bucket.*OK"
-
-        jupyter labextension list
         jupyter labextension list 2>&1 | grep -ie "tvb-ext-bucket.*OK"
         python -m jupyterlab.browser_check
+        
+    - name: Run Python & JS tests
+      run: |
+        set -eux
+        pytest tvb_ext_bucket -r ap
+        yarn test
 
     - name: Package the extension
       run: |
@@ -63,18 +62,37 @@ jobs:
         python -m build
         pip uninstall -y "tvb-ext-bucket" jupyterlab
 
-    - name: SonarCloud Scan
-      uses: sonarsource/sonarcloud-github-action@v2
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-
     - name: Upload extension packages
       uses: actions/upload-artifact@v4
       with:
         name: extension-artifacts-${{ matrix.python-version }}
         path: dist/tvb_ext_bucket*
         if-no-files-found: error
+
+  sonar_cloud:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Base Setup
+        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
+
+      - name: Install dependencies
+        run: python -m pip install -U "jupyterlab>=4.0.0,<5" ebrains-drive pytest pytest-mock "pytest-jupyter[server]>=0.6.0" pytest_tornasync pytest-cov
+
+      - name: Compute coverage
+        run: |
+          python -m pip install .[test]
+          pytest -vv -r ap --cov --cov-report=xml tvb_ext_bucket
+          yarn test --coverage
+
+      - name: SonarCloud Scan
+        uses: sonarsource/sonarcloud-github-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
   test_isolated:
     needs: build
@@ -99,10 +117,7 @@ jobs:
         pip install "jupyterlab>=4.0.0,<5" tvb_ext_bucket*.whl
 
 
-        jupyter server extension list
         jupyter server extension list 2>&1 | grep -ie "tvb_ext_bucket.*OK"
-
-        jupyter labextension list
         jupyter labextension list 2>&1 | grep -ie "tvb-ext-bucket.*OK"
         python -m jupyterlab.browser_check --no-browser-test
 

@@ -61,7 +61,7 @@ pip install -e ".[test]"
 # Link your development version of the extension with JupyterLab
 jupyter labextension develop . --overwrite
 # Server extension must be manually installed in develop mode
-jupyter server extension enable tvb_ext_bucket
+jupyter server extension enable tvbextbucket
 # Rebuild extension Typescript source after making changes
 jlpm build
 ```

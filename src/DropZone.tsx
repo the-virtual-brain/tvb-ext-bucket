@@ -5,7 +5,7 @@ import React, {
   useCallback,
   useMemo
 } from 'react';
-import { Drag, IDragEvent } from '@lumino/dragdrop'; // must use the deprecated interface
+import { Drag } from '@lumino/dragdrop';
 import { useBucketContext } from './BucketContext';
 import { JpFileBrowser } from './JpFileBrowser';
 import { MimeData } from '@lumino/coreutils';
@@ -62,10 +62,9 @@ export const DropZone: React.FC<DropZone.IProps> = ({
     let isValidDragSource = false;
 
     let item = possibleTargets?.next();
-    while (item) {
-      const currentItem = item.value;
-      items.push(currentItem);
-      if (currentItem.name === dragSourceElement?.innerText) {
+    while (item.value) {
+      items.push(item.value);
+      if (item.value.name === dragSourceElement?.innerText) {
         isValidDragSource = true;
       }
       item = possibleTargets?.next();
@@ -100,43 +99,43 @@ export const DropZone: React.FC<DropZone.IProps> = ({
         console.log('handling: ', ev.type);
         switch (ev.type) {
           case 'lm-dragenter':
-            handler._dragEnter(ev as IDragEvent);
+            handler._dragEnter(ev as Drag.Event);
             break;
           case 'lm-dragover':
-            handler._dragOver(ev as IDragEvent);
+            handler._dragOver(ev as Drag.Event);
             break;
           case 'lm-drop':
             handler
-              ._drop(ev as IDragEvent)
+              ._drop(ev as Drag.Event)
               .then(() => console.log('drop handled'));
             break;
           case 'lm-dragleave':
-            handler._dragLeave(ev as IDragEvent);
+            handler._dragLeave(ev as Drag.Event);
             break;
         }
       },
-      _dragEnter: (ev: IDragEvent): void => {
+      _dragEnter: (ev: Drag.Event): void => {
         ev.preventDefault();
         ev.stopPropagation();
         setMode('hover');
-        Drag.overrideCursor('pointer');
       },
-      _dragOver: (ev: IDragEvent): void => {
+      _dragOver: (ev: Drag.Event): void => {
         ev.preventDefault();
         ev.stopPropagation();
         ev.dropAction = ev.proposedAction; // needed to trigger lm-drop
-        Drag.overrideCursor('pointer');
         setMode('hover');
       },
-      _dragLeave: (ev: IDragEvent): void => {
+      _dragLeave: (ev: Drag.Event): void => {
         ev.preventDefault();
         ev.stopPropagation();
-        Drag.overrideCursor('auto');
         setMode('default');
       },
-      _drop: async (ev: IDragEvent): Promise<void> => {
+      _drop: async (ev: Drag.Event): Promise<void> => {
         ev.preventDefault();
         ev.stopPropagation();
+        if (!ev.source) {
+          return;
+        }
         if (uploadingRef.current) {
           await showErrorMessage(
             notAllowedUpload.title,
@@ -154,7 +153,6 @@ export const DropZone: React.FC<DropZone.IProps> = ({
           );
         }
 
-        Drag.overrideCursor('auto');
         setMode('default');
         setUploading(false);
       }
