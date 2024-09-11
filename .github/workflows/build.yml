@@ -52,7 +52,7 @@ jobs:
       run: |
         set -eux
         pytest tvb_ext_bucket -r ap
-        yarn tes
+        yarn test
 
     - name: Package the extension
       run: |
