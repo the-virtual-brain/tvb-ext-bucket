@@ -1,3 +1,8 @@
+<p>
+    <img src="style/icons/TVB_logo.svg" alt="TVB logo" title="TVB" align="right" height="100" />
+</p>
+
+
 # tvb-ext-bucket
 
 [![Github Actions Status](https://github.com/the-virtual-brain/tvb-ext-bucket/workflows/Build/badge.svg)](https://github.com/the-virtual-brain/tvb-ext-bucket/actions/workflows/build.yml)
