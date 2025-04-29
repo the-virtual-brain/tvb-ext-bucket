@@ -95,7 +95,7 @@ class Bucket:
         marker = None  # remember name of last entry
         visited_name = set()
         LOGGER.info(f'Listing contents in {self.dataproxy_entity_name}')
-        url = f'/v1/{self.target}/{self.dataproxy_entity_name}'
+        url = f'/v1/{self.target.value}/{self.dataproxy_entity_name}'
         while True:
             resp = self.client.get(url, params={
                 'limit': self.LIMIT,
@@ -147,7 +147,7 @@ class Bucket:
         """
         LOGGER.info(f'getting UPLOAD url for file {filename}')
         filename = filename.lstrip("/")
-        resp = self.client.put(f"/v1/{self.target}/{self.dataproxy_entity_name}/{filename}")
+        resp = self.client.put(f"/v1/{self.target.value}/{self.dataproxy_entity_name}/{filename}")
         upload_url = resp.json().get("url")
         LOGGER.info(f'got url: {upload_url}')
         return upload_url

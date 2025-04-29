@@ -180,7 +180,7 @@ class BucketWrapper:
         """
         target = f'{to_path}/{with_name}'.lstrip('/')
         bucket = self._get_bucket(to_bucket)
-        resp = bucket.client.put(f"/v1/{bucket.target}/{bucket.dataproxy_entity_name}/{target}")
+        resp = bucket.client.put(f"/v1/{bucket.target.value}/{bucket.dataproxy_entity_name}/{target}")
         upload_url = resp.json().get("url")
         if upload_url is None:
             raise RuntimeError(f"Bucket.upload did not get upload url.")

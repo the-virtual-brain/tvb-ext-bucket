@@ -83,7 +83,7 @@ def test_bucket_instance():
     assert bucket.public is False
     assert bucket.dataproxy_entity_name == name
     assert bucket.is_initialised is False
-    assert bucket.target == 'buckets'
+    assert bucket.target.value == 'buckets'
     assert bucket.role is None
 
 
@@ -91,7 +91,7 @@ def test_bucket_instance_from_json():
     fake_client = MockClient()
     bucket = Bucket.from_json(fake_client, BUCKET_STAT_JSON)
     assert bucket.client == fake_client
-    assert bucket.target == 'buckets'
+    assert bucket.target.value == 'buckets'
     assert bucket.name == BUCKET_STAT_JSON['name']
     assert bucket.objects_count == BUCKET_STAT_JSON['objects_count']
     assert bucket.bytes == BUCKET_STAT_JSON['bytes']
