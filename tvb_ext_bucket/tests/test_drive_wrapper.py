@@ -11,6 +11,7 @@ import shutil
 
 import pytest
 
+from tvb_ext_bucket.bucket_api.bucket import Endpoint
 from tvb_ext_bucket.ebrains_drive_wrapper import BucketWrapper
 from tvb_ext_bucket.exceptions import CollabAccessError, DataproxyFileNotFound
 from ebrains_drive.exceptions import Unauthorized
@@ -29,7 +30,7 @@ class MockFile:
 
 
 class MockBucket:
-    def __init__(self, files_count=2, name='test_bucket', target='buckets', dataproxy_entity_name='test_bucket'):
+    def __init__(self, files_count=2, name='test_bucket', target=Endpoint.BUCKETS, dataproxy_entity_name='test_bucket'):
         self.name = name
         self.files = [MockFile(f'file{number}') for number in range(files_count)]
         self.target = target
