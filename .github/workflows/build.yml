@@ -67,7 +67,7 @@ jobs:
     - name: Upload extension packages
       uses: actions/upload-artifact@v4
       with:
-        name: extension-artifacts
+        name: extension-artifacts-${{ matrix.python-version }}
         path: dist/tvb_ext_bucket*
         if-no-files-found: error
 
