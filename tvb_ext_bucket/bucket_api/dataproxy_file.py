@@ -39,7 +39,7 @@ class DataproxyFile:
     def get_download_link(self):
         """n.b. this download link expires in the order of seconds if bucket is private
         """
-        resp = self.client.get(f"/v1/{self.bucket.target.value}/{self.bucket.dataproxy_entity_name}/{self.name}", params={
+        resp = self.client.get(f"/v1/{self.bucket.target}/{self.bucket.dataproxy_entity_name}/{self.name}", params={
             "redirect": False
         })
         return resp.json().get("url")
@@ -63,7 +63,7 @@ class DataproxyFile:
         # documentation states that response is different ({"failures":[string], "number_of_removals":0})
         # however it is not
         LOGGER.warning(f'DELETE: trying to delete file {self.name}')
-        resp = self.client.delete(f"/v1/{self.bucket.target.value}/{self.bucket.dataproxy_entity_name}/{self.name}")
+        resp = self.client.delete(f"/v1/{self.bucket.target}/{self.bucket.dataproxy_entity_name}/{self.name}")
         json_resp = resp.json()
         LOGGER.info(f'result of operation: {json_resp}')
         assert json_resp.get('status_code') == 200
