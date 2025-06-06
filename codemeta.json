@@ -8,9 +8,9 @@
     "documentation": "https://wiki.ebrains.eu/bin/view/Collabs/tvb-widgets/Extension%20tvb-ext-bucket/",
     "downloadUrl": "https://files.pythonhosted.org/packages/0c/d0/9f0143649b4ed1afb5577d13d4478120f5314bea2c15f02e0daf17ce27f8/tvb_ext_bucket-2.0.0.tar.gz",
     "datePublished": "2023-02-14",
-    "dateModified": "2024-09-25",
-    "version": "2.0.0",
-    "releaseNotes": "https://github.com/the-virtual-brain/tvb-ext-bucket/releases/tag/2.0.0",
+    "dateModified": "2025-02-14",
+    "version": "2.0.1",
+    "releaseNotes": "https://github.com/the-virtual-brain/tvb-ext-bucket/releases/tag/v2.0.1",
     "description": "This is an EBRAINS Lab extension providing a file browser for the Data-Proxy straight into Jupyter Lab while bringing the power of drag & drop to manage files from and into local storage, EBRAINS Drive or Data-Proxy (Bucket).",
     "funding": "101147319 (EBRAINS 2.0 Project)",
     "funder": {
