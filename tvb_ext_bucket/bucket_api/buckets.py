@@ -1,4 +1,4 @@
-from ebrains_drive.buckets import Buckets
+from ebrains_storage.buckets import Buckets
 from tvb_ext_bucket.exceptions import BucketDTOError
 from tvb_ext_bucket.logger.builder import get_logger
 from dataclasses import dataclass

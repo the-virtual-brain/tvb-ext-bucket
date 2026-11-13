@@ -1,7 +1,7 @@
 from typing import Dict, Any
 
 import requests
-from ebrains_drive.utils import on_401_raise_unauthorized
+from ebrains_storage.utils import on_401_raise_unauthorized
 from tvb_ext_bucket.logger.builder import get_logger
 
 LOGGER = get_logger(__name__)
