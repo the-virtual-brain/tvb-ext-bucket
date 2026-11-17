@@ -13,7 +13,7 @@ import pytest
 
 from tvb_ext_bucket.ebrains_drive_wrapper import BucketWrapper
 from tvb_ext_bucket.exceptions import CollabAccessError, DataproxyFileNotFound
-from ebrains_drive.exceptions import Unauthorized
+from ebrains_storage.exceptions import Unauthorized
 
 
 class MockFile:

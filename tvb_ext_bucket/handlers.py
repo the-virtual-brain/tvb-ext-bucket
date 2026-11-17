@@ -12,7 +12,7 @@ from jupyter_server.utils import url_path_join
 import tornado
 from tornado.web import MissingArgumentError
 
-from ebrains_drive.exceptions import TokenExpired
+from ebrains_storage.exceptions import TokenExpired
 from tvb_ext_bucket.exceptions import CollabAccessError
 from tvb_ext_bucket.ebrains_drive_wrapper import BucketWrapper
 from tvb_ext_bucket.logger.builder import get_logger

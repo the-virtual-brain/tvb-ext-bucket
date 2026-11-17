@@ -1,4 +1,4 @@
-from ebrains_drive.client import BucketApiClient
+from ebrains_storage.client import BucketApiClient
 
 from tvb_ext_bucket.bucket_api.buckets import ExtendedBuckets
 

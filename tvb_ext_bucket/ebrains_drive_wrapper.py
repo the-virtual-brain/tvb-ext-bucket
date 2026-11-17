@@ -4,12 +4,12 @@
 #
 # (c) 2022-2025, TVB Widgets Team
 #
-import ebrains_drive.exceptions
+import ebrains_storage.exceptions
 import requests
 
-from ebrains_drive.files import DataproxyFile
-from ebrains_drive.exceptions import Unauthorized
-from ebrains_drive.bucket import Bucket
+from ebrains_storage.files import DataproxyFile
+from ebrains_storage.exceptions import Unauthorized
+from ebrains_storage.bucket import Bucket
 
 from tvb_ext_bucket.logger.builder import get_logger
 from tvb_ext_bucket.exceptions import CollabTokenError, CollabAccessError, DataproxyFileNotFound
@@ -67,7 +67,7 @@ class BucketWrapper:
             error_msg = f'Could not access bucket {bucket_name} due to {str(e)}. Your access might be limited!'
             LOGGER.error(error_msg)
             raise CollabAccessError(error_msg)
-        except ebrains_drive.exceptions.ClientHttpError as e:
+        except ebrains_storage.exceptions.ClientHttpError as e:
             error_msg = f'Cant get client for bucket {bucket_name}. ' \
                         f'Bucket might not exist or your access is limited! {e.message}. '
             LOGGER.error(error_msg)
@@ -222,7 +222,7 @@ class BucketWrapper:
         collab_name = pathlib.Path.cwd().parts[4]  # educated guess, safer than lab env vars
         LOGGER.info(f'educated guess: {collab_name}')
         LOGGER.info('getting drive client...')
-        drive_client = ebrains_drive.connect(token=token)
+        drive_client = ebrains_storage.connect(token=token)
         LOGGER.info(f'try to get repo by name {collab_name}...')
         repos = drive_client.repos.get_repos_by_name(collab_name)
         assert (len(repos) == 1)

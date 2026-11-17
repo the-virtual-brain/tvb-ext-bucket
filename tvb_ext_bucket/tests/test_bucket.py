@@ -2,8 +2,8 @@ import os
 import tempfile
 
 import pytest
-from ebrains_drive.bucket import Bucket
-from ebrains_drive.exceptions import DoesNotExist
+from ebrains_storage.bucket import Bucket
+from ebrains_storage.exceptions import DoesNotExist
 from requests import Response
 from tempfile import TemporaryFile
 
